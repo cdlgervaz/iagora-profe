@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>IAgora, profe? Oficina sobre IA na Educação</title>
+<link rel="stylesheet" href="assets/style.css?v67" />
+</head>
+<body>
+<header class="topo">
+  <div class="wrap">
+    <h1>IAgora, profe? Oficina sobre IA na Educação</h1>
+    <p>Atividades preparatórias para a oficina</p>
+    <nav id="nav"></nav>
+  </div>
+</header>
+
+<main>
+  <div class="aviso">
+    <strong>Versão em fase de testes.</strong> Material para avaliação e uso acadêmico; <strong>não</strong>
+    pode ser usado comercialmente. <a href="termos.html">Termos de uso e como citar</a>.
+  </div>
+
+  <section class="exp-hero">
+    <span class="badge">Pré-atividade • 4 horas • Laboratório de informática</span>
+    <h2>Olá! Seja bem-vinda.</h2>
+    <p>Nesta página, você realizará atividades que preparam para o encontro presencial. Você vai responder
+    a uma <strong>sondagem inicial</strong> sobre a sua percepção de uso de IA e realizar um
+    <strong>autodiagnóstico</strong> relacionado aos seus saberes digitais. Além disso, deixaremos
+    indicada a <strong>bibliografia</strong> para o encontro. Qualquer dúvida, você pode entrar em
+    contato pelo e-mail <a href="mailto:cgervaz@proton.me">cgervaz@proton.me</a>.</p>
+  </section>
+
+  <section class="card">
+    <h2>Autoria e declaração de uso de IA</h2>
+    <p>Este material foi desenvolvido pela <strong>professora Camila Gervaz</strong>,
+    <strong>doutoranda da USP</strong>, para esta oficina.</p>
+    <p><strong>Declaração de uso de IA:</strong> em transparência, o material e o site foram
+    organizados pela autoria com apoio de <strong>assistência de IA generativa</strong> (assistente de
+    código <em>opencode</em>, modelo <em>DeepSeek-Flash</em>) na implementação da ferramenta e da
+    interface. Os conteúdos, instrumentos e roteiros foram definidos pela autoria a partir de
+    <strong>fontes oficiais</strong> indicadas nas seções correspondentes. Os resultados devem ser conferidos na fonte.</p>
+  </section>
+
+  <section class="card">
+    <div class="callout"><strong>Atenção!</strong> Ao realizar as atividades, faça sempre o
+    <strong>envio para a professora</strong>.</div>
+    <p style="text-align:center;margin-top:1rem">
+      <button class="btn verde" id="btnIniciar">Começar</button>
+    </p>
+  </section>
+
+</main>
+
+<footer class="rodape">
+  <p><strong>Fontes:</strong> Matriz de Saberes Digitais Docentes (MEC) e Marco de competências em IA para professores (UNESCO).</p>
+  <p>© 2026 Camila Gervaz. Todos os direitos reservados. <strong>Versão em fase de testes</strong> — sem uso comercial e sem alterações sem autorização. <a href="termos.html">Termos de uso e como citar</a>.</p>
+</footer>
+
+<script src="assets/config.js?v67"></script>
+<script src="assets/data.js?v67"></script>
+<script src="assets/app.js?v67"></script>
+<script>
+renderNav("Início");
+
+
+document.getElementById("btnIniciar").onclick = () => {
+  concluirEtapa("inicio");
+  location.href = "sondagem.html";
+};
+
+/* Oculta a etapa Jigsaw quando desativada na configuração */
+if ((window.OFICINA_CONFIG || {}).mostrarJigsaw === false) {
+  const pj = document.getElementById("passoJigsaw");
+  if (pj) pj.style.display = "none";
+}
+if ((window.OFICINA_CONFIG || {}).mostrarExploracao === false) {
+  const pe = document.getElementById("passoExploracao");
+  if (pe) pe.style.display = "none";
+}
+
+/* Se já terminou tudo, mostra aviso de navegação livre */
+if (tudoLiberado()) {
+  const a = document.querySelector(".exp-hero p");
+  if (a) a.innerHTML += " <strong>Você já concluiu a trilha — navegue livremente!</strong>";
+}
+</script>
+</body>
+</html>

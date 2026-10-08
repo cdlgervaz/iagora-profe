@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>IAgora, profe?! — Estrutura da oficina</title>
+<script>
+(function () {
+  function h(s) { var x = 2166136261; for (var i = 0; i < s.length; i++) { x ^= s.charCodeAt(i); x = Math.imul(x, 16777619); } return x >>> 0; }
+  var key = ""; try { key = new URLSearchParams(location.search).get("k") || ""; } catch (e) {}
+  if (h(key) !== 1500854198) {
+    document.addEventListener("DOMContentLoaded", function () {
+      document.body.innerHTML = '<div style="padding:40px;font-family:system-ui;color:#e5e7eb;max-width:640px;margin:0 auto">' +
+        '<h2>Acesso restrito</h2><p>Apresentação da oficina. Abra pelo link com a <strong>chave</strong>.</p></div>';
+    });
+  }
+})();
+</script>
+<style>
+  :root { --indigo:#4338ca; --indigo2:#4f46e5; --violet:#6d28d9; --tinta:#0f172a; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    background: radial-gradient(1200px 600px at 15% -10%, #1e1b4b 0%, #0b1220 55%, #0b1220 100%);
+    color: #e5e7eb; display: flex; align-items: center; justify-content: center; padding: 3vh 3vw;
+  }
+  .slide { width: 100%; max-width: 1280px; }
+  .marca { display: inline-block; background: #fde68a; color: #7c2d12; font-weight: 800; border-radius: 999px; padding: .2rem .8rem; font-size: clamp(.8rem,1.2vw,1rem); }
+  h1 { font-size: clamp(1.8rem, 3.6vw, 3rem); margin: .6rem 0 .2rem; color: #fff; }
+  .sub { color: #9ca3af; font-size: clamp(.95rem,1.4vw,1.2rem); margin: 0 0 1.4rem; }
+  .cols { display: grid; grid-template-columns: 0.9fr 1.6fr; gap: 1.4rem; align-items: start; }
+  .box { border: 1px solid #334155; border-radius: 18px; padding: 1.1rem 1.2rem; background: rgba(255,255,255,.04); }
+  .box h2 { margin: 0 0 .5rem; font-size: clamp(1.1rem,1.9vw,1.5rem); color: #fff; }
+  .box.antes { border-color: #4f46e5; background: rgba(79,70,229,.12); }
+  .box.dia { border-color: #7c3aed; background: rgba(124,58,237,.10); }
+  ol, ul { margin: .2rem 0 0 1.1rem; padding: 0; }
+  li { font-size: clamp(.92rem,1.5vw,1.18rem); line-height: 1.4; margin: .5rem 0; }
+  li b { color: #fff; }
+  .tag { color: #c7d2fe; font-weight: 700; }
+  .rodape { margin-top: 1.3rem; color: #94a3b8; font-size: clamp(.8rem,1.2vw,.95rem); }
+  @media (max-width: 820px) { .cols { grid-template-columns: 1fr; } }
+  @media print {
+    body { background: #fff; color: #111; padding: 12mm; }
+    .box { border-color: #bbb; background: #fafafa; } h1, .box h2, li b { color: #111; } .sub, .rodape, .tag { color: #444; }
+  }
+</style>
+</head>
+<body>
+  <main class="slide">
+    <span class="marca">IAgora, profe?!</span>
+    <h1>Estrutura da oficina</h1>
+    <p class="sub">Oficina de Inteligência Artificial no Contexto Brasileiro — professora Camila Gervaz (doutoranda da USP).</p>
+
+    <div class="cols">
+      <section class="box antes">
+        <h2>Etapa prévia (online)</h2>
+        <ul>
+          <li><b>Autodiagnóstico</b> — saberes digitais e uso de IA.</li>
+          <li><b>Desafio</b> — missão preparada antes do encontro.</li>
+        </ul>
+      </section>
+
+      <section class="box dia">
+        <h2>No dia (4 horas)</h2>
+        <ol>
+          <li><b>Apresentação e experiências com tecnologia</b> + comentário do diagnóstico.</li>
+          <li><b>História e tipos de IA</b>: atividade exploratória no dia, debate e discussão teórica.</li>
+          <li><b>Funcionamento e desafios da IA</b>: atividade exploratória com uso de IAs (análise de notícias, relação com os desafios), debate e discussão teórica (limitações; uso para além das big techs).</li>
+          <li><b>Documentos orientadores para o uso de IA na educação</b>: introdução teórica com documentos e currículos (documentos UNESCO), atividade-desafio preparada antes da aula, debate e síntese.</li>
+          <li><b>Propostas</b> de atividades/projetos que as participantes podem elaborar e utilizar.</li>
+        </ol>
+      </section>
+    </div>
+
+    <p class="rodape">Navegação não necessária — slide único. Para imprimir/gerar PDF: Ctrl+P.</p>
+  </main>
+</body>
+</html>

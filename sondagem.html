@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>IAgora, profe?! — Sondagem inicial</title>
+<link rel="stylesheet" href="assets/style.css?v67" />
+</head>
+<body>
+<header class="topo">
+  <div class="wrap">
+    <p class="marca">IAgora, profe?!</p>
+    <h1>Sondagem inicial</h1>
+    <p>Antes do autodiagnóstico, conte um pouco sobre você. Suas respostas ajudam a professora a preparar a oficina.</p>
+    <nav id="nav"></nav>
+  </div>
+</header>
+
+<main>
+  <div class="aviso">
+    <strong>Versão em fase de testes.</strong> Material para avaliação e uso acadêmico; <strong>não</strong>
+    pode ser usado comercialmente. <a href="termos.html">Termos de uso e como citar</a>.
+  </div>
+
+  <section class="card" id="sondagem">
+    <label for="nome">Seu nome</label>
+    <input type="text" id="nome" placeholder="Como você quer ser chamada?" />
+
+    <div class="sond-q">
+      <strong>1. Em uma frase, o que é IA para você?</strong>
+      <textarea id="s1" placeholder="Escreva com suas palavras..."></textarea>
+    </div>
+
+    <div class="sond-q">
+      <strong>2. Você usa ou já usou IA?</strong>
+      <div class="sond-ops">
+        <label class="sond-op"><input type="radio" name="s2" value="Nunca usei" />Nunca usei</label>
+        <label class="sond-op"><input type="radio" name="s2" value="Já usei uma vez" />Já usei uma vez</label>
+        <label class="sond-op"><input type="radio" name="s2" value="Uso pontualmente" />Uso pontualmente</label>
+        <label class="sond-op"><input type="radio" name="s2" value="Uso com frequência" />Uso com frequência</label>
+        <label class="sond-op"><input type="radio" name="s2" value="Uso sempre" />Uso sempre</label>
+      </div>
+    </div>
+
+    <div class="sond-q">
+      <strong>3. Quais IAs você usa ou já usou? E como você as usa?</strong>
+      <div class="sond-ops" style="margin-bottom:.5rem">
+        <label class="sond-op"><input type="checkbox" name="s3" value="ChatGPT" />ChatGPT</label>
+        <label class="sond-op"><input type="checkbox" name="s3" value="Gemini" />Gemini</label>
+        <label class="sond-op"><input type="checkbox" name="s3" value="Copilot" />Copilot</label>
+        <label class="sond-op"><input type="checkbox" name="s3" value="DeepSeek" />DeepSeek</label>
+        <label class="sond-op"><input type="checkbox" name="s3" value="DuckDuckGo AI Chat" />DuckDuckGo AI Chat</label>
+        <label class="sond-op"><input type="checkbox" name="s3" value="Sabiá/Maritaca" />Sabiá/Maritaca</label>
+        <label class="sond-op"><input type="checkbox" name="s3" value="Outra" />Outra</label>
+      </div>
+      <textarea id="s3como" placeholder="Como você usa (para quê)? Ex.: revisão de texto, plano de aula..."></textarea>
+    </div>
+
+    <div class="sond-q">
+      <strong>4. O que você mais teme e o que mais deseja com a IA na sua pesquisa/docência?</strong>
+      <textarea id="s4"></textarea>
+    </div>
+
+    <div class="sond-q">
+      <strong>5. O que você sabe sobre a história e/ou a estrutura da IA?</strong>
+      <textarea id="s5"></textarea>
+    </div>
+
+    <div class="sond-q">
+      <strong>6. O que você gostaria de ver/fazer na oficina?</strong>
+      <textarea id="s6"></textarea>
+    </div>
+
+    <p style="text-align:center;margin-top:1rem">
+      <button class="btn verde" id="btnSondagem">Enviar sondagem à professora</button>
+      <span class="ajuda" id="msgSond" style="display:block;margin-top:.4rem"></span>
+    </p>
+    <p style="text-align:center;margin-top:1rem" id="prox" hidden>
+      <a class="btn verde" href="autodiagnostico.html">Continuar para o Autodiagnóstico →</a>
+    </p>
+  </section>
+</main>
+
+<footer class="rodape">
+  <p><strong>Fontes:</strong> Matriz de Saberes Digitais Docentes (MEC) e Marco de competências em IA para professores (UNESCO).</p>
+  <p>© 2026 Camila Gervaz. Todos os direitos reservados. <strong>Versão em fase de testes</strong> — sem uso comercial e sem alterações sem autorização. <a href="termos.html">Termos de uso e como citar</a>.</p>
+</footer>
+
+<script src="assets/config.js?v67"></script>
+<script src="assets/data.js?v67"></script>
+<script src="assets/app.js?v67"></script>
+<script>
+renderNav("Sondagem inicial");
+
+/* pré-preenche o nome salvo (se a pessoa voltar) */
+(function () { const n = lerLocal("nomeAluna"); if (n) document.getElementById("nome").value = n; })();
+
+document.querySelectorAll("#sondagem .sond-op input").forEach(inp => {
+  inp.addEventListener("change", () => {
+    if (inp.type === "radio") {
+      document.querySelectorAll('#sondagem input[name="' + inp.name + '"]').forEach(o => o.closest(".sond-op").classList.remove("sel"));
+      inp.closest(".sond-op").classList.add("sel");
+    } else {
+      inp.closest(".sond-op").classList.toggle("sel", inp.checked);
+    }
+  });
+});
+
+document.getElementById("btnSondagem").onclick = function () {
+  const nome = (document.getElementById("nome").value || "").trim();
+  if (!nome) { alert("Informe seu nome."); return; }
+  salvarLocal("nomeAluna", nome);
+  const s2 = (document.querySelector('#sondagem input[name="s2"]:checked') || {}).value || "(não respondido)";
+  const ias = Array.from(document.querySelectorAll('#sondagem input[name="s3"]:checked')).map(c => c.value);
+  const txt =
+`SONDAGEM INICIAL
+Nome: ${nome}
+1) O que é IA: ${document.getElementById("s1").value.trim()}
+2) Usa/já usou IA: ${s2}
+3) IAs usadas: ${ias.join(", ") || "(não marcou)"}
+   Como usa: ${document.getElementById("s3como").value.trim()}
+4) Teme/deseja: ${document.getElementById("s4").value.trim()}
+5) Sabe sobre história/estrutura da IA: ${document.getElementById("s5").value.trim()}
+6) Gostaria na oficina: ${document.getElementById("s6").value.trim()}`;
+  salvarLocal("sondagem", txt);
+  enviarResultado({ tipo: "sondagem", nome, resumo: txt, ts: new Date().toISOString() }, this);
+  document.getElementById("msgSond").textContent = "Sondagem enviada. Obrigada!";
+  document.getElementById("prox").hidden = false;
+  concluirEtapa("sondagem");
+};
+
+gateEtapa("sondagem");
+</script>
+</body>
+</html>

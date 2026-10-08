@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>IAgora, profe?! — Leitura</title>
+<link rel="stylesheet" href="assets/style.css?v67" />
+</head>
+<body>
+<header class="topo">
+  <div class="wrap">
+    <p class="marca">IAgora, profe?!</p>
+    <h1>Leitura para o encontro</h1>
+    <p>Uma leitura curta para preparar a nossa conversa presencial.</p>
+    <nav id="nav"></nav>
+  </div>
+</header>
+
+<main>
+  <div class="aviso">
+    <strong>Versão em fase de testes.</strong> Material para avaliação e uso acadêmico; <strong>não</strong>
+    pode ser usado comercialmente. <a href="termos.html">Termos de uso e como citar</a>.
+  </div>
+
+  <section class="card">
+    <h2>Indicação de leitura</h2>
+    <p>Para o nosso encontro, faça a leitura do <strong>Capítulo 1 — “Orientações de base sobre IA na educação”</strong>.</p>
+    <p><a class="btn ghost" target="_blank" rel="noopener" href="https://www.gov.br/mec/pt-br/escolas-conectadas/arquivos/ia-basica.pdf">Acesse aqui o documento</a></p>
+    <p class="ajuda">Caso deseje, envie suas dúvidas ou comentários para a professora.</p>
+
+    <label for="nome">Seu nome</label>
+    <input type="text" id="nome" placeholder="Como você quer ser chamada?" />
+
+    <label for="coment">Dúvidas ou comentários sobre a leitura</label>
+    <textarea id="coment" style="min-height:140px" placeholder="Escreva aqui suas dúvidas, trechos que chamaram atenção, comentários..."></textarea>
+
+    <p style="text-align:center;margin-top:1rem">
+      <button class="btn verde" id="btnLeitura">Enviar para a professora</button>
+      <span class="ajuda" id="msgLeitura" style="display:block;margin-top:.4rem"></span>
+    </p>
+  </section>
+
+  <section class="card">
+    <h2>Bibliografia complementar</h2>
+    <ul>
+      <li><a href="https://unesdoc.unesco.org/ark:/48223/pf0000394280_por" target="_blank" rel="noopener">UNESCO (2024) — Marco referencial de competências em IA para professores</a></li>
+      <li><a href="https://unesdoc.unesco.org/ark:/48223/pf0000390241" target="_blank" rel="noopener">UNESCO (2023) — Guia para a IA generativa na educação e na pesquisa</a></li>
+      <li><a href="https://www.gov.br/mec/pt-br/referencial-de-ia-na-educacao" target="_blank" rel="noopener">MEC — Referencial para o uso e desenvolvimento responsáveis de IA na Educação</a></li>
+      <li><a href="https://www.gov.br/mec/pt-br/escolas-conectadas/arquivos/saberes-digitais.pdf" target="_blank" rel="noopener">MEC (2024) — Matriz de Saberes Digitais Docentes</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="rodape">
+  <p><strong>Fontes:</strong> Matriz de Saberes Digitais Docentes (MEC) e Marco de competências em IA para professores (UNESCO).</p>
+  <p>© 2026 Camila Gervaz. Todos os direitos reservados. <strong>Versão em fase de testes</strong> — sem uso comercial e sem alterações sem autorização. <a href="termos.html">Termos de uso e como citar</a>.</p>
+</footer>
+
+<script src="assets/config.js?v67"></script>
+<script src="assets/data.js?v67"></script>
+<script src="assets/app.js?v67"></script>
+<script>
+renderNav("Leitura");
+
+(function () { const n = lerLocal("nomeAluna"); if (n) document.getElementById("nome").value = n; })();
+
+document.getElementById("btnLeitura").onclick = function () {
+  const nome = (document.getElementById("nome").value || "").trim();
+  if (!nome) { alert("Informe seu nome."); return; }
+  salvarLocal("nomeAluna", nome);
+  const coment = (document.getElementById("coment").value || "").trim();
+  const txt = "LEITURA — Inteligência Artificial na Educação Básica (Cap. 1)\nNome: " + nome + "\n\n" +
+    (coment || "(sem comentários)");
+  salvarLocal("leitura", txt);
+  enviarResultado({ tipo: "leitura", nome, resumo: txt, ts: new Date().toISOString() }, this);
+  document.getElementById("msgLeitura").textContent = "Enviado. Obrigada!";
+  concluirEtapa("leitura");
+};
+
+gateEtapa("leitura");
+</script>
+</body>
+</html>

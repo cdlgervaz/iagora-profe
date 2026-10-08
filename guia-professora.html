@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>IAgora, profe?! — Guia da Professora</title>
+<link rel="stylesheet" href="assets/style.css" />
+<style>
+  /* Tema próprio do site da PROFESSORA (âmbar/marrom) — distinto do site das alunas (índigo). */
+  :root {
+    --verde: #7c2d12; --verde2: #b45309; --indigo: #b45309; --indigo2: #d97706;
+    --amarelo: #fde68a; --azul: #0e7490; --azul2: #0e7490;
+  }
+  header.topo { background: linear-gradient(120deg, #0f172a 0%, #334155 55%, #78350f 100%); }
+  .flag-prof { display: inline-block; background: #fde68a; color: #7c2d12; border-radius: 999px;
+    padding: .12rem .65rem; font-weight: 800; font-size: .82rem; margin-left: .4rem; }
+</style>
+</head>
+<body>
+<header class="topo">
+  <div class="wrap">
+    <p class="marca">IAgora, profe?!<span class="flag-prof">Site da Professora</span></p>
+    <h1>Guia da Professora</h1>
+    <p>Missões, atividades por nível e banco de referências (institucionais, acadêmicas e regulatórias).
+    <strong>Página não publicada no site das alunas.</strong></p>
+    <p class="ajuda">Versão de teste atual (alunas): <strong>Sondagem inicial → Autodiagnóstico → Leitura</strong>.
+    Desafios ativos: <strong>C1, C2, C3</strong> (A e B ocultos). Missão, Exploração mediada e Jigsaw ocultos.</p>
+  </div>
+</header>
+
+<main>
+  <section class="card">
+    <h2>1. Missões (jigsaw) — editor</h2>
+    <p class="ajuda">Edite cada campo, adicione/remova passos e papéis. As mudanças ficam salvas neste navegador.
+    Ao terminar, clique em <strong>“Baixar data.js (aplicar)”</strong> e substitua o arquivo
+    <code>site/assets/data.js</code>; depois rode <code>./publicar.sh iagora-profe</code>.</p>
+    <p class="ajuda"><strong>Desafios ativos para as alunas:</strong> C1, C2, C3 (definido em
+    <code>config.js → papeisAtivos</code>). Os papéis A e B continuam aqui, mas não são atribuídos.</p>
+    <p class="sem-print">
+      <button class="btn verde" id="btnSalvarMissoes">Salvar alterações</button>
+      <button class="btn" id="btnAddPapel">Adicionar papel</button>
+      <button class="btn ghost" id="btnRestaurarMissoes">Restaurar originais</button>
+      <button class="btn amarelo" id="btnExportarData">Baixar data.js (aplicar)</button>
+    </p>
+    <p class="sem-print">
+      <label style="display:inline-block;margin-right:.6rem">Tema:
+        <select id="fTema"><option value="">todos</option><option value="A">A</option><option value="B">B</option><option value="C">C</option></select>
+      </label>
+      <label style="display:inline-block">Busca: <input type="text" id="fMissao" placeholder="palavra-chave" style="width:auto;display:inline-block" /></label>
+    </p>
+    <div id="missoes"></div>
+  </section>
+
+  <section class="card">
+    <h2>2. Exploração mediada por nível</h2>
+    <div id="exploracoes"></div>
+  </section>
+
+  <section class="card">
+    <h2>3. Banco de referências</h2>
+    <p class="ajuda">Filtre por base, nível ou tópico; adicione novas referências (ficam salvas neste navegador) e
+    exporte/importe a lista.</p>
+    <div class="grid cols-3 sem-print">
+      <label>Base <select id="rBase"><option value="">todas</option></select></label>
+      <label>Nível <select id="rNivel"><option value="">todos</option><option value="adquirir">adquirir</option><option value="aprofundar">aprofundar</option><option value="criar">criar</option></select></label>
+      <label>Tópico <select id="rTopico"><option value="">todos</option></select></label>
+    </div>
+    <p class="sem-print"><label>Busca <input type="text" id="rBusca" placeholder="título, autoria, nota..." /></label></p>
+    <p class="sem-print">
+      <button class="btn ghost" id="btnExport">Exportar (JSON)</button>
+      <label class="btn ghost" style="cursor:pointer">Importar (JSON)<input type="file" id="fileImport" accept=".json" style="display:none" /></label>
+      <span class="ajuda" id="msgRef"></span>
+    </p>
+    <div id="listaRefs"></div>
+  </section>
+
+  <section class="card sem-print">
+    <h2>4. Adicionar referência</h2>
+    <div class="grid cols-2">
+      <label>Título <input type="text" id="nTitulo" /></label>
+      <label>Autoria / instituição <input type="text" id="nAutoria" /></label>
+      <label>Ano <input type="text" id="nAno" /></label>
+      <label>Base <select id="nBase"><option>UNESCO</option><option>MEC</option><option>Regulação/BR</option><option>Acadêmica</option><option>Internacional</option><option>Ferramenta</option></select></label>
+      <label>Tipo <input type="text" id="nTipo" placeholder="documento/artigo/livro/ferramenta" /></label>
+      <label>Nível <select id="nNivel"><option value="todos">todos</option><option>adquirir</option><option>aprofundar</option><option>criar</option></select></label>
+      <label>Tópicos (ex.: U1,U2) <input type="text" id="nTopicos" /></label>
+      <label>URL <input type="text" id="nUrl" /></label>
+    </div>
+    <label>Nota <input type="text" id="nNota" /></label>
+    <p><button class="btn verde" id="btnAddRef">Adicionar referência</button></p>
+  </section>
+
+  <section class="card sem-print">
+    <h2>5. Resultados das alunas</h2>
+    <p class="ajuda">Cole os códigos recebidos (um por linha, começam com <code>OIA1:</code>) ou importe um JSON.
+    Você verá um cartão por aluna com nível, dimensões, sondagem, exploração e missão.</p>
+    <textarea id="resCodes" style="min-height:110px" placeholder="OIA1:...
+OIA1:..."></textarea>
+    <p>
+      <button class="btn verde" id="btnAnalisarRes">Analisar resultados</button>
+      <label class="btn ghost" style="cursor:pointer">Importar JSON<input type="file" id="resFile" accept=".json" style="display:none" /></label>
+      <button class="btn ghost" id="btnExportRes">Exportar JSON</button>
+      <input type="text" id="resBusca" placeholder="buscar por nome" style="width:auto;display:inline-block" />
+    </p>
+    <div id="resResumo"></div>
+    <div id="resCards"></div>
+  </section>
+</main>
+
+<footer class="rodape">
+  <p>© 2026 Camila Gervaz. Material em fase de testes — uso acadêmico. <a href="termos.html">Termos de uso e como citar</a>.</p>
+</footer>
+
+<script src="assets/config.js"></script>
+<script src="assets/data.js"></script>
+<script src="assets/referencias.js"></script>
+<script src="assets/app.js"></script>
+<script>
+(function () {
+/* Acesso restrito por chave na URL (link privado da professora) */
+const GUIA_HASH = 2961114164;
+const chave = getParam("k") || lerLocal("guiaKey") || "";
+if (hashStr(String(chave)) !== GUIA_HASH) {
+  document.querySelector("main").innerHTML =
+    '<section class="card"><h2>Acesso restrito</h2><p>Esta página é da professora. ' +
+    'Abra pelo link com a <strong>chave de acesso</strong>.</p></section>';
+  return;
+}
+salvarLocal("guiaKey", chave);
+
+/* ==== Missões (editor) ==== */
+const ORIG = { papeis: JSON.parse(JSON.stringify(OFICINA.papeis)), docLinks: JSON.parse(JSON.stringify(OFICINA.docLinks || {})) };
+let papeis = JSON.parse(JSON.stringify(ORIG.papeis));
+let docLinks = JSON.parse(JSON.stringify(ORIG.docLinks));
+(function () { const s = lerLocal("papeisEdit"); if (s && Array.isArray(s.papeis)) { papeis = s.papeis; docLinks = s.docLinks || docLinks; } })();
+
+function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;"); }
+
+function renderMissoes() {
+  const tema = document.getElementById("fTema").value;
+  const q = document.getElementById("fMissao").value.trim().toLowerCase();
+  const lista = papeis.filter(p => (!tema || p.tema === tema) &&
+    (!q || (p.id + " " + p.titulo + " " + (p.doc || "") + " " + (p.missao || []).join(" ")).toLowerCase().includes(q)));
+  document.getElementById("missoes").innerHTML = (lista.map(p => {
+    const dl = docLinks[p.id] || ["", ""];
+    return `<details style="border:1px solid var(--borda);border-radius:10px;margin:.5rem 0;background:#fff">
+      <summary style="cursor:pointer;font-weight:700;padding:.55rem .75rem"><span class="badge-papel">${p.id}</span> ${esc(p.titulo)}</summary>
+      <div style="padding:.4rem .8rem .8rem">
+        <div class="grid cols-3">
+          <label>ID <input data-f="id" data-id="${esc(p.id)}" value="${esc(p.id)}" /></label>
+          <label>Tema <select data-f="tema" data-id="${esc(p.id)}"><option ${p.tema==="A"?"selected":""}>A</option><option ${p.tema==="B"?"selected":""}>B</option><option ${p.tema==="C"?"selected":""}>C</option></select></label>
+          <label>Tema (nome) <input data-f="temaNome" data-id="${esc(p.id)}" value="${esc(p.temaNome || "")}" /></label>
+        </div>
+        <label>Título <input data-f="titulo" data-id="${esc(p.id)}" value="${esc(p.titulo || "")}" /></label>
+        <label>Documento-base <textarea data-f="doc" data-id="${esc(p.id)}">${esc(p.doc || "")}</textarea></label>
+        <div class="grid cols-2">
+          <label>Fonte <input data-f="docFonte" data-id="${esc(p.id)}" value="${esc(p.docFonte || "")}" /></label>
+          <label>Nome do link do documento <input data-f="docLinkTxt" data-id="${esc(p.id)}" value="${esc(dl[0] || "")}" /></label>
+        </div>
+        <label>URL do documento <input data-f="docLink" data-id="${esc(p.id)}" value="${esc(dl[1] || "")}" /></label>
+        <label>Ferramenta de IA <textarea data-f="ia" data-id="${esc(p.id)}">${esc(p.ia || "")}</textarea></label>
+        <label>Missão (um passo por linha) <textarea data-f="missao" data-id="${esc(p.id)}" style="min-height:110px">${esc((p.missao || []).join("\n"))}</textarea></label>
+        <label>Pergunta crítica <input data-f="pergunta" data-id="${esc(p.id)}" value="${esc(p.pergunta || "")}" /></label>
+        <label>Produto <textarea data-f="produto" data-id="${esc(p.id)}">${esc(p.produto || "")}</textarea></label>
+        <label>Base <input data-f="base" data-id="${esc(p.id)}" value="${esc(p.base || "")}" /></label>
+        <label>Critérios (separe por “|”) <input data-f="criterios" data-id="${esc(p.id)}" value="${esc((p.criterios || []).join(" | "))}" /></label>
+        <label>Dica / plano B <textarea data-f="dica" data-id="${esc(p.id)}">${esc(p.dica || "")}</textarea></label>
+        <p><button class="btn ghost" data-excluir="${esc(p.id)}">Excluir este papel</button></p>
+      </div>
+    </details>`;
+  }).join("")) || "<p class='ajuda'>Nenhum papel com esses filtros.</p>";
+  document.querySelectorAll("[data-excluir]").forEach(b => b.onclick = () => {
+    if (!confirm("Excluir o papel " + b.dataset.excluir + "?")) return;
+    papeis = papeis.filter(x => x.id !== b.dataset.excluir); salvarMissoes(); renderMissoes();
+  });
+}
+function coletarDados() {
+  const novo = JSON.parse(JSON.stringify(papeis));
+  const novoDL = JSON.parse(JSON.stringify(docLinks));
+  document.querySelectorAll("#missoes [data-f]").forEach(el => {
+    const id = el.dataset.id, f = el.dataset.f;
+    const p = novo.find(x => x.id === id); if (!p) return;
+    const v = el.value;
+    if (f === "missao") p.missao = v.split("\n").map(s => s.trim()).filter(Boolean);
+    else if (f === "criterios") p.criterios = v.split("|").map(s => s.trim()).filter(Boolean);
+    else if (f === "docLink") { novoDL[id] = novoDL[id] || ["", ""]; novoDL[id][1] = v.trim(); }
+    else if (f === "docLinkTxt") { novoDL[id] = novoDL[id] || ["", ""]; novoDL[id][0] = v.trim(); }
+    else p[f] = v;
+  });
+  papeis = novo; docLinks = novoDL;
+}
+function salvarMissoes() { salvarLocal("papeisEdit", { papeis: papeis, docLinks: docLinks }); }
+
+document.getElementById("fTema").addEventListener("change", renderMissoes);
+document.getElementById("fMissao").addEventListener("input", renderMissoes);
+document.getElementById("btnSalvarMissoes").onclick = () => { coletarDados(); salvarMissoes(); renderMissoes(); alert("Missões salvas neste navegador."); };
+document.getElementById("btnRestaurarMissoes").onclick = () => { if (confirm("Restaurar as missões originais?")) { papeis = JSON.parse(JSON.stringify(ORIG.papeis)); docLinks = JSON.parse(JSON.stringify(ORIG.docLinks)); salvarMissoes(); renderMissoes(); } };
+document.getElementById("btnAddPapel").onclick = () => {
+  coletarDados();
+  const n = prompt("Novo ID do papel (ex.: A4, B4, C4):"); if (!n) return;
+  if (papeis.some(p => p.id === n)) { alert("Já existe um papel com esse ID."); return; }
+  papeis.push({ id: n, tema: (n[0] || "A"), temaNome: "", titulo: "Novo papel", doc: "", docFonte: "", ia: "", missao: [""], pergunta: "", produto: "", base: "", criterios: [""], dica: "" });
+  salvarMissoes(); renderMissoes();
+};
+document.getElementById("btnExportarData").onclick = () => {
+  coletarDados(); salvarMissoes();
+  const novo = Object.assign({}, OFICINA, { papeis: papeis, docLinks: docLinks });
+  const js = "/* Gerado no Guia da Professora — substitua site/assets/data.js */\n" +
+    "const OFICINA = " + JSON.stringify(novo, null, 2) + ";\n\n" +
+    "if (typeof window !== \"undefined\") { window.OFICINA = OFICINA; }\n";
+  baixarArquivo("data.js", js);
+  alert("Baixado data.js. Substitua o arquivo site/assets/data.js e rode ./publicar.sh iagora-profe.");
+};
+
+/* ==== Exploração ==== */
+document.getElementById("exploracoes").innerHTML = ["adquirir", "aprofundar", "criar"].map(k => {
+  const e = OFICINA.exploracoesNivel[k];
+  return `<div class="caixa evitar-quebra" style="margin-bottom:.6rem">
+    <div class="mini"><h3>${k[0].toUpperCase() + k.slice(1)} — ${e.titulo}</h3></div>
+    <p><strong>Objetivo:</strong> ${e.objetivo}</p>
+    <p><strong>Ferramenta:</strong> ${e.ferramenta}</p>
+    <p><small>${e.base || ""}</small></p>
+    <div class="tres"><div><h4>Antes</h4><ul>${e.antes.map(x => `<li>${x}</li>`).join("")}</ul></div>
+      <div><h4>Durante</h4><ul>${e.durante.map(x => `<li>${x}</li>`).join("")}</ul></div>
+      <div><h4>Depois</h4><ul>${e.depois.map(x => `<li>${x}</li>`).join("")}</ul></div></div>
+    <p><strong>Produto:</strong> ${e.produto}</p>
+    <p><small><strong>Critérios:</strong> ${(e.criterios || []).join(" • ")}</small></p>
+  </div>`;
+}).join("");
+
+/* ==== Referências ==== */
+let custom = lerLocal("refsCustom") || [];
+function todasRefs() { return (window.OFICINA_REFS || []).concat(custom); }
+function normNivel(n) { return Array.isArray(n) ? n : [n]; }
+
+function popularFiltros() {
+  const bases = Array.from(new Set(todasRefs().map(r => r.base))).sort();
+  const sel = document.getElementById("rBase");
+  sel.innerHTML = `<option value="">todas</option>` + bases.map(b => `<option>${b}</option>`).join("");
+  const topicos = Array.from(new Set(todasRefs().flatMap(r => r.topicos || []))).sort();
+  document.getElementById("rTopico").innerHTML = `<option value="">todos</option>` + topicos.map(t => `<option>${t}</option>`).join("");
+}
+function renderRefs() {
+  const base = document.getElementById("rBase").value;
+  const nivel = document.getElementById("rNivel").value;
+  const topico = document.getElementById("rTopico").value;
+  const q = document.getElementById("rBusca").value.trim().toLowerCase();
+  const lista = todasRefs().filter(r =>
+    (!base || r.base === base) &&
+    (!nivel || normNivel(r.nivel).includes(nivel) || normNivel(r.nivel).includes("todos")) &&
+    (!topico || (r.topicos || []).includes(topico)) &&
+    (!q || (r.titulo + " " + r.autoria + " " + (r.nota || "")).toLowerCase().includes(q)));
+  document.getElementById("listaRefs").innerHTML = lista.length ? `<table class="tabela">
+    <tr><th>Título</th><th>Autoria/ano</th><th>Base</th><th>Nível</th><th>Tópicos</th><th>Link</th></tr>
+    ${lista.map(r => `<tr>
+      <td>${r.titulo}${r.nota ? `<br><small>${r.nota}</small>` : ""}</td>
+      <td>${r.autoria}<br><small>${r.ano || ""}</small></td>
+      <td>${r.base}</td>
+      <td><small>${normNivel(r.nivel).join(", ")}</small></td>
+      <td><small>${(r.topicos || []).join(", ")}</small></td>
+      <td>${r.url ? `<a href="${r.url}" target="_blank" rel="noopener">abrir</a>` : "—"}</td>
+    </tr>`).join("")}
+  </table>` : "<p class='ajuda'>Nenhuma referência com esses filtros.</p>";
+}
+["rBase", "rNivel", "rTopico"].forEach(id => document.getElementById(id).addEventListener("change", renderRefs));
+document.getElementById("rBusca").addEventListener("input", renderRefs);
+
+document.getElementById("btnAddRef").onclick = () => {
+  const r = {
+    titulo: document.getElementById("nTitulo").value.trim(),
+    autoria: document.getElementById("nAutoria").value.trim(),
+    ano: document.getElementById("nAno").value.trim(),
+    base: document.getElementById("nBase").value,
+    tipo: document.getElementById("nTipo").value.trim(),
+    nivel: document.getElementById("nNivel").value,
+    topicos: document.getElementById("nTopicos").value.split(",").map(s => s.trim()).filter(Boolean),
+    url: document.getElementById("nUrl").value.trim(),
+    nota: document.getElementById("nNota").value.trim()
+  };
+  if (!r.titulo) { alert("Informe ao menos o título."); return; }
+  custom.push(r); salvarLocal("refsCustom", custom);
+  popularFiltros(); renderRefs();
+  ["nTitulo", "nAutoria", "nAno", "nTipo", "nTopicos", "nUrl", "nNota"].forEach(id => document.getElementById(id).value = "");
+  document.getElementById("msgRef").textContent = "Referência adicionada.";
+  setTimeout(() => (document.getElementById("msgRef").textContent = ""), 2000);
+};
+document.getElementById("btnExport").onclick = () => baixarArquivo("referencias-oficina-ia.json", JSON.stringify(todasRefs(), null, 2));
+document.getElementById("fileImport").addEventListener("change", e => {
+  const f = e.target.files[0]; if (!f) return;
+  const fr = new FileReader();
+  fr.onload = () => { try { const arr = JSON.parse(fr.result); if (!Array.isArray(arr)) throw 0; custom = custom.concat(arr); salvarLocal("refsCustom", custom); popularFiltros(); renderRefs(); alert("Importado: " + arr.length + " referência(s)."); } catch (err) { alert("Arquivo inválido."); } };
+  fr.readAsText(f);
+});
+
+/* ==== Resultados das alunas ==== */
+let resultados = [];
+function decodTodos(txt) {
+  const re = /OIA1:[A-Za-z0-9+/=]+/g;
+  const ach = txt.match(re) || txt.split("\n").map(s => s.trim()).filter(Boolean);
+  const out = []; ach.forEach(c => { const o = decodificarEntrega(c); if (o) out.push(o); });
+  return out;
+}
+function agrupar(list) {
+  const alunos = {};
+  list.forEach(o => { const k = (o.nome || "(sem nome)").toLowerCase(); if (!alunos[k]) alunos[k] = { nome: o.nome || "(sem nome)", itens: [] }; alunos[k].itens.push(o); });
+  return Object.values(alunos).sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
+}
+function nivelDePct(v) { return OFICINA.quiz.niveis.find(n => v <= n.max) || OFICINA.quiz.niveis[OFICINA.quiz.niveis.length - 1]; }
+function dimChips(pct) {
+  if (!pct) return "";
+  return `<div class="dim-chips" style="justify-content:flex-start">` + OFICINA.quiz.dimensoes.map(d => {
+    const v = pct[d.id]; if (v == null) return "";
+    return `<span class="dim-chip" style="border-color:${d.cor}" title="${d.nome} — ${v}% (${nivelDePct(v).nome})"><b style="color:${d.cor}">${d.id}</b> ${v}%</span>`;
+  }).join("") + `</div>`;
+}
+function renderRes() {
+  const q = document.getElementById("resBusca").value.trim().toLowerCase();
+  const alunos = agrupar(resultados).filter(a => !q || a.nome.toLowerCase().includes(q));
+  const diags = resultados.filter(o => o.tipo === "autodiagnostico");
+  const media = diags.length ? Math.round(diags.reduce((s, o) => s + (o.geral || 0), 0) / diags.length) : 0;
+  document.getElementById("resResumo").innerHTML = `<div class="grid cols-3">
+    <div class="card" style="margin:0;text-align:center"><h3>${alunos.length}</h3><p class="ajuda">alunas</p></div>
+    <div class="card" style="margin:0;text-align:center"><h3>${diags.length}</h3><p class="ajuda">diagnósticos</p></div>
+    <div class="card" style="margin:0;text-align:center"><h3>${media}%</h3><p class="ajuda">média geral</p></div></div>`;
+  document.getElementById("resCards").innerHTML = (alunos.map(a => {
+    const diag = a.itens.find(i => i.tipo === "autodiagnostico");
+    const sond = a.itens.find(i => i.tipo === "sondagem");
+    const exp = a.itens.find(i => i.tipo === "exploracao");
+    const mis = a.itens.find(i => i.tipo === "missao");
+    const nv = diag && diag.perfil ? (OFICINA.quiz.niveis.find(n => n.nome === diag.perfil) || {}) : null;
+    const cor = (nv && nv.cor) || "#b45309";
+    return `<div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap">
+        <h3 style="margin:0">${esc(a.nome)}</h3>
+        ${diag ? `<span class="pill" style="background:${cor};color:#fff">${diag.perfil} · ${diag.geral}%</span>` : ""}
+      </div>
+      ${diag ? dimChips(diag.pct) : ""}
+      ${diag && diag.prioridades ? `<p class="ajuda">Prioridades: ${diag.prioridades.join(", ")}</p>` : ""}
+      ${sond ? `<details><summary><strong>Sondagem inicial</strong></summary><div style="white-space:pre-wrap;font-size:.86rem;margin-top:.4rem">${esc(sond.resumo || "")}</div></details>` : ""}
+      ${exp ? `<details><summary><strong>Exploração mediada</strong> ${exp.nivelNome ? "(" + exp.nivelNome + ")" : ""}</summary><div style="white-space:pre-wrap;font-size:.86rem;margin-top:.4rem">${esc(exp.resumo || "")}</div></details>` : ""}
+      ${mis ? `<p style="margin:.4rem 0"><strong>Missão:</strong> ${esc(mis.papelId || "")} — ${esc(mis.titulo || "")}${mis.produto ? `<br><em>Produto: ${esc(mis.produto)}</em>` : ""}</p>` : ""}
+      <p class="ajuda" style="margin:.3rem 0 0">Entregas: ${a.itens.length}</p>
+    </div>`;
+  }).join("")) || "<p class='ajuda'>Nenhum resultado. Cole os códigos e clique em “Analisar resultados”.</p>";
+}
+document.getElementById("btnAnalisarRes").onclick = () => { resultados = decodTodos(document.getElementById("resCodes").value); renderRes(); };
+document.getElementById("resBusca").addEventListener("input", renderRes);
+document.getElementById("resFile").addEventListener("change", e => {
+  const f = e.target.files[0]; if (!f) return;
+  const fr = new FileReader();
+  fr.onload = () => { try { const arr = JSON.parse(fr.result); if (Array.isArray(arr)) { resultados = resultados.concat(arr); renderRes(); } else alert("JSON deve ser uma lista."); } catch (err) { alert("JSON inválido."); } };
+  fr.readAsText(f);
+});
+document.getElementById("btnExportRes").onclick = () => baixarArquivo("resultados-alunas.json", JSON.stringify(resultados, null, 2));
+
+popularFiltros(); renderRefs(); renderMissoes();
+})();
+</script>
+</body>
+</html>

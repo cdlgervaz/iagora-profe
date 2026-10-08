@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>IAgora, profe?! — Autodiagnóstico</title>
+<link rel="stylesheet" href="assets/style.css?v67" />
+</head>
+<body>
+<header class="topo">
+  <div class="wrap">
+    <p class="marca">IAgora, profe?!</p>
+    <h1>Autodiagnóstico de Saberes Digitais e de Uso de IA</h1>
+    <nav id="nav"></nav>
+  </div>
+</header>
+
+<main>
+  <div class="aviso">
+    <strong>Versão em fase de testes.</strong> Material para avaliação e uso acadêmico; <strong>não</strong>
+    pode ser usado comercialmente. <a href="termos.html">Termos de uso e como citar</a>.
+  </div>
+
+  <section class="card" id="inicio">
+    <div class="callout">Você realizará um <strong>autodiagnóstico dos seus saberes digitais docentes</strong>, desenvolvido especialmente para esta oficina com base na
+      <a href="https://www.gov.br/mec/pt-br/escolas-conectadas/arquivos/saberes-digitais.pdf" target="_blank" rel="noopener">Matriz de Saberes Digitais Docentes (MEC, 2024)</a> e no
+      <a href="https://unesdoc.unesco.org/ark:/48223/pf0000394280_por" target="_blank" rel="noopener">Marco de competências em IA para professores (UNESCO, 2024)</a>.
+      Caso deseje, você também pode realizar o <a href="https://avamec.mec.gov.br/#/autodiagnostico" target="_blank" rel="noopener">autodiagnóstico oficial de Saberes Digitais Docentes</a> disponível na plataforma AVAMEC.</div>
+    <p class="ajuda">Nome informado na sondagem: <strong id="nomeInfo">—</strong> · <a href="sondagem.html">editar na Sondagem inicial</a>.</p>
+    <p class="ajuda">Você vai responder <strong>uma afirmação por vez</strong>. Marque a alternativa e,
+    se quiser, escreva uma justificativa curta.</p>
+    <p style="text-align:center;margin-top:1rem"><button class="btn verde" id="btnComecar">Começar o autodiagnóstico</button></p>
+  </section>
+
+  <section id="quizArea" style="display:none">
+    <div class="diag-grid">
+      <aside class="diag-side sem-print" id="diagSide"></aside>
+      <div class="diag-main">
+        <div class="progresso sem-print">
+          <div class="prog-top">
+            <span id="contador">Pergunta 1 de 20</span>
+            <span id="pct">0%</span>
+          </div>
+          <div class="barra" style="height:9px;margin-top:.35rem">
+            <span id="barra" style="width:0%;background:linear-gradient(90deg,var(--azul2),var(--indigo2))"></span>
+          </div>
+        </div>
+        <div id="questao"></div>
+        <div class="wizard-nav sem-print">
+          <button class="btn ghost" id="btnVoltar">← Voltar</button>
+          <button class="btn verde" id="btnAvancar" disabled>Avançar →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="resultado"></section>
+</main>
+
+<footer class="rodape">
+  <p><strong>Fontes:</strong> Matriz de Saberes Digitais Docentes (MEC) e Marco de competências em IA para professores (UNESCO).</p>
+  <p>© 2026 Camila Gervaz. Todos os direitos reservados. <strong>Versão em fase de testes</strong> — sem uso comercial e sem alterações sem autorização. <a href="termos.html">Termos de uso e como citar</a>.</p>
+</footer>
+
+<script src="assets/config.js?v67"></script>
+<script src="assets/data.js?v67"></script>
+<script src="assets/app.js?v67"></script>
+<script>
+renderNav("Autodiagnóstico");
+
+(function () {
+  const el = document.getElementById("nomeInfo");
+  if (el) el.textContent = lerLocal("nomeAluna") || "(não informado — preencha na Sondagem inicial)";
+})();
+
+const Q = OFICINA.quiz;
+const respostas = {};
+const justifs = {};
+const CORES = ["#94a3b8", "#a5b4fc", "#818cf8", "#6366f1", "#4f46e5"];
+const EMOJIS = ["😞", "🙁", "😐", "🙂", "😄"]; // discordo totalmente → concordo totalmente
+const NOMES_CURTOS = {
+  M1: "Ensino e Aprendizagem", M2: "Cidadania Digital", M3: "Desenvolvimento Profissional",
+  U1: "Centrada no ser humano", U2: "Ética da IA", U3: "Fundamentos e aplicações",
+  U4: "Pedagogia com IA", U5: "Desenvolvimento profissional (IA)"
+};
+
+const perguntas = Q.itens.map(it => ({ ...it, dim: Q.dimensoes.find(d => d.id === it.d) }));
+let cur = 0;
+renderSide();
+
+const inicioEl = document.getElementById("inicio");
+const areaEl = document.getElementById("quizArea");
+const questaoEl = document.getElementById("questao");
+
+function blocoDe(dim) { return Q.blocos.find(b => b.id === dim.bloco); }
+
+function renderSide() {
+  const el = document.getElementById("diagSide");
+  if (!el) return;
+  el.innerHTML = `<p class="diag-side-titulo">Dimensões</p>` + Q.blocos.map(b => `
+    <p class="diag-side-bloco">${b.id === "MEC" ? "MEC — Saberes Digitais" : "UNESCO — Uso de IA"}</p>
+    ${Q.dimensoes.filter(d => d.bloco === b.id).map(d => `<div class="diag-dim" data-dim="${d.id}" title="${d.desc.replace(/"/g, "'")}">
+      <span class="diag-sigla" style="background:${d.cor}">${d.id}</span>
+      <span class="diag-nome">${NOMES_CURTOS[d.id] || d.nome}</span>
+    </div>`).join("")}`).join("");
+}
+
+function renderQuestao() {
+  const it = perguntas[cur];
+  const dim = it.dim;
+  document.querySelectorAll(".diag-dim").forEach(x => x.classList.toggle("atual", x.dataset.dim === dim.id));
+  const opcoes = Q.escala.map((e, i) => {
+    const sel = respostas["q" + it.id] === e.v;
+    const barras = [0, 1, 2, 3, 4].map(k =>
+      `<i style="height:${8 + k * 4}px;background:${k <= i ? CORES[i] : "#dbe2ea"}"></i>`).join("");
+    return `<label class="opt ${sel ? "selecionado" : ""}" style="--c:${CORES[i]}" title="${e.label}" aria-label="${e.label}">
+      <input type="radio" name="q${it.id}" value="${e.v}" ${sel ? "checked" : ""} />
+      <span class="marca" aria-hidden="true"></span>
+      <span class="emoji" aria-hidden="true">${EMOJIS[i]}</span>
+      <span class="bars" aria-hidden="true">${barras}</span>
+    </label>`;
+  }).join("");
+
+  questaoEl.innerHTML = `
+    <div class="card q-card">
+      <div class="dim-topo">
+        <span class="dim-badge" style="background:${dim.cor}">${dim.id}</span>
+        <div><strong>${dim.nome}</strong><br><small class="ajuda">${blocoDe(dim).nome}</small></div>
+      </div>
+      <span class="q-saber">${it.saber}</span>
+      <p class="q-text"><span class="q-num">${it.id}</span>${it.t}</p>
+      <p class="ajuda" style="margin:.1rem 0 .45rem">Como você se sente com relação a essa afirmação?</p>
+      <div class="escala">${opcoes}</div>
+      <textarea class="justif" data-q="${it.id}" placeholder="Justificativa curta: como você faria ou um exemplo (opcional)">${justifs[it.id] || ""}</textarea>
+    </div>`;
+
+  questaoEl.querySelectorAll("input[type=radio]").forEach(r => {
+    r.addEventListener("change", e => {
+      respostas["q" + it.id] = parseInt(e.target.value, 10);
+      questaoEl.querySelectorAll(".escala .opt").forEach(o => o.classList.remove("selecionado"));
+      e.target.closest(".opt").classList.add("selecionado");
+      atualizarNavegacao();
+      setTimeout(proximo, 220);
+    });
+  });
+  const ta = questaoEl.querySelector(".justif");
+  ta.addEventListener("input", () => { justifs[it.id] = ta.value; salvarLocal("justificativas", justifs); });
+
+  atualizarNavegacao();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function atualizarNavegacao() {
+  const total = perguntas.length;
+  document.getElementById("contador").textContent = "Pergunta " + (cur + 1) + " de " + total;
+  const pct = Math.round((cur) / total * 100);
+  document.getElementById("barra").style.width = pct + "%";
+  document.getElementById("pct").textContent = pct + "%";
+  const respondidas = Object.keys(respostas).length;
+  const atualOk = respostas["q" + perguntas[cur].id] !== undefined;
+  const btnAv = document.getElementById("btnAvancar");
+  const ultima = cur === total - 1;
+  btnAv.textContent = ultima ? "Calcular meu perfil e minha trilha" : "Avançar →";
+  btnAv.disabled = !atualOk;
+  document.getElementById("btnVoltar").disabled = cur === 0;
+  // completa = 100% apenas no fim
+  if (ultima && respondidas === total) { document.getElementById("barra").style.width = "100%"; document.getElementById("pct").textContent = "100%"; }
+}
+
+function proximo() {
+  if (respostas["q" + perguntas[cur].id] === undefined) return;
+  if (cur < perguntas.length - 1) { cur++; renderQuestao(); }
+  else { finalizar(); }
+}
+function voltar() { if (cur > 0) { cur--; renderQuestao(); } }
+
+document.getElementById("btnComecar").onclick = () => {
+  inicioEl.style.display = "none";
+  areaEl.style.display = "block";
+  cur = 0;
+  renderQuestao();
+};
+
+/* (A Sondagem inicial foi movida para sondagem.html) */
+document.getElementById("btnAvancar").onclick = proximo;
+document.getElementById("btnVoltar").onclick = voltar;
+document.addEventListener("keydown", e => {
+  if (areaEl.style.display === "none") return;
+  if (e.key === "Enter" && (e.target.tagName !== "TEXTAREA")) {
+    if (!document.getElementById("btnAvancar").disabled) { e.preventDefault(); proximo(); }
+  }
+});
+
+/* ---- Níveis ---- */
+function nivelDe(pct) { return Q.niveis.find(n => pct <= n.max) || Q.niveis[Q.niveis.length - 1]; }
+function nivelIndice(nome) { return Math.max(0, Q.niveis.findIndex(n => n.nome === nome)); }
+function tierDoNivel(nome) {
+  return { "Iniciante": "adquirir", "Familiarização": "adquirir", "Adaptação": "aprofundar",
+           "Integração": "aprofundar", "Liderança": "criar" }[nome] || "adquirir";
+}
+function proximoNivel(nome) { return Q.niveis[Math.min(nivelIndice(nome) + 1, Q.niveis.length - 1)].nome; }
+
+function gauge(geral) {
+  const idx = nivelIndice(nivelDe(geral).nome);
+  const cx = 110, cy = 108, r = 92, n = Q.niveis.length, passo = 180 / n;
+  let arcos = "";
+  for (let i = 0; i < n; i++) {
+    const a1 = 180 - i * passo, a2 = 180 - (i + 1) * passo;
+    const p1 = [cx + r * Math.cos(a1 * Math.PI / 180), cy - r * Math.sin(a1 * Math.PI / 180)];
+    const p2 = [cx + r * Math.cos(a2 * Math.PI / 180), cy - r * Math.sin(a2 * Math.PI / 180)];
+    arcos += `<path d="M ${p1[0].toFixed(1)} ${p1[1].toFixed(1)} A ${r} ${r} 0 0 1 ${p2[0].toFixed(1)} ${p2[1].toFixed(1)}" fill="none" stroke="${Q.niveis[i].cor}" stroke-width="20"/>`;
+  }
+  const ang = 180 - (idx * passo + passo / 2);
+  const nx = cx + (r - 12) * Math.cos(ang * Math.PI / 180);
+  const ny = cy - (r - 12) * Math.sin(ang * Math.PI / 180);
+  const marcos = Q.niveis.map((lv, i) => `
+    <div class="nivel-marco ${i === idx ? "ativo" : ""}">
+      <span class="bolha" style="${i === idx ? "background:" + lv.cor + ";border-color:" + lv.cor + ";color:#fff" : ""}">${i + 1}</span>
+      <span class="nome">${lv.nome}</span>
+    </div>`).join("");
+  return `<div class="gauge-wrap">
+      <p class="gauge-titulo">A devolutiva da autoavaliação revela o perfil em <strong>5 níveis</strong> de desenvolvimento</p>
+      <svg viewBox="0 0 220 132" class="gauge" role="img" aria-label="Nível ${idx + 1} de 5: ${Q.niveis[idx].nome}">
+        ${arcos}
+        <line x1="${cx}" y1="${cy}" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}" stroke="#334155" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="${cx}" cy="${cy}" r="7" fill="#334155"/>
+      </svg>
+      <div class="niveis-marco">${marcos}</div>
+    </div>`;
+}
+
+function finalizar() {
+  const nome = lerLocal("nomeAluna") || "(sem nome)";
+  const porDim = {};
+  Q.dimensoes.forEach(d => (porDim[d.id] = { soma: 0, max: 0 }));
+  Q.itens.forEach(it => { porDim[it.d].soma += respostas["q" + it.id]; porDim[it.d].max += 4; });
+  const pct = {};
+  Q.dimensoes.forEach(d => (pct[d.id] = Math.round(porDim[d.id].soma / porDim[d.id].max * 100)));
+  const geral = Math.round(
+    Q.dimensoes.reduce((s, d) => s + porDim[d.id].soma, 0) /
+    Q.dimensoes.reduce((s, d) => s + porDim[d.id].max, 0) * 100);
+  const nivelGeral = nivelDe(geral);
+
+  /* Resumo compacto: um selo por dimensão, com explicação ao passar o cursor */
+  const resumo = `<div class="dim-chips">` + Q.dimensoes.map(d => {
+    const nv = nivelDe(pct[d.id]);
+    const tip = (d.nome + " — " + pct[d.id] + "% (" + nv.nome + "). " + d.desc).replace(/"/g, "'");
+    return `<span class="dim-chip" style="border-color:${d.cor}" title="${tip}">
+      <b style="color:${d.cor}">${d.id}</b> ${pct[d.id]}%</span>`;
+  }).join("") + `</div>`;
+
+  /* Badges (gamificação) — acumulam entre tentativas */
+  const ICONES = {
+    check: '<path d="M5 12.5l4 4 10-10" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>',
+    star: '<path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9 6.8 19.2l1-5.8L3.5 9.2l5.9-.9z" fill="currentColor"/>',
+    book: '<path d="M4 5h7a3 3 0 0 1 3 3v11H7a3 3 0 0 1-3-3zM20 5h-7a3 3 0 0 0-3 3v11h6a3 3 0 0 0 3-3z" fill="none" stroke="currentColor" stroke-width="1.8"/>',
+    target: '<circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3.2" fill="currentColor"/>',
+    shield: '<path d="M12 3l7 3v5c0 5-3.2 8-7 10-3.8-2-7-5-7-10V6z" fill="none" stroke="currentColor" stroke-width="2"/>'
+  };
+  const medals = [{ id: "diag", titulo: "Diagnóstico feito", desc: "Você concluiu o autodiagnóstico de saberes digitais e uso de IA.", cor: "#4f46e5", icone: "check" }];
+  medals.push({ id: "nivel-" + nivelGeral.nome, titulo: "Nível " + nivelGeral.nome, desc: "Seu perfil geral: " + nivelGeral.nome + " (" + geral + "%).", cor: nivelGeral.cor, icone: "star" });
+  Q.dimensoes.forEach(d => { if (pct[d.id] >= 75) medals.push({ id: "destaque-" + d.id, titulo: "Destaque: " + d.id, desc: "Muito bem em " + d.nome + " (" + pct[d.id] + "%).", cor: d.cor, icone: "shield" }); });
+  if (Q.dimensoes.every(d => pct[d.id] >= 50)) medals.push({ id: "equilibrio", titulo: "Perfil equilibrado", desc: "Todas as dimensões com 50% ou mais.", cor: "#0e7490", icone: "target" });
+  if (geral >= 75) medals.push({ id: "referencia", titulo: "Referência da turma", desc: "Perfil geral de 75% ou mais — você pode ajudar colegas.", cor: "#7c2d12", icone: "book" });
+  const acumulado = (lerLocal("badges") || []).slice();
+  medals.forEach(m => { if (!acumulado.some(x => x.id === m.id)) acumulado.push(m); });
+  salvarLocal("badges", acumulado);
+  const badgesHtml = `<div class="badges">` + acumulado.map(m => `<span class="badge-item" style="--bc:${m.cor}" title="${m.desc.replace(/"/g, "'")}">
+    <span class="badge-medal"><svg viewBox="0 0 24 24" width="20" height="20">${ICONES[m.icone] || ICONES.star}</svg></span>
+    <span class="badge-label">${m.titulo}</span></span>`).join("") + `</div>`;
+
+  const ordenadas = Q.dimensoes.slice().sort((a, b) => pct[a.id] - pct[b.id]);
+  const trilha = ordenadas.map((d, i) => {
+    const nv = nivelDe(pct[d.id]);
+    const ch = tierDoNivel(nv.nome);
+    const prox = proximoNivel(nv.nome);
+    const estica = prox !== nv.nome ? ((Q.desafios[d.id] || {})[tierDoNivel(prox)] || "") : "";
+    return `<div class="trilha-card" style="border-left-color:${d.cor}">
+      <div class="cab">
+        <strong>${i + 1}. ${d.nome}</strong>
+        <span class="pill" style="background:${nv.cor};color:#fff">${nv.nome} • ${pct[d.id]}%</span>
+      </div>
+      <p class="desafio">${(Q.desafios[d.id] || {})[ch] || ""}</p>
+      ${estica ? `<div class="ir-alem"><strong>Ir além (${prox}):</strong> ${estica}</div>` : ""}
+      <p class="ajuda" style="margin:.4rem 0 0">Apoio: ${Q.recomendacoes[d.id] || ""}</p>
+    </div>`;
+  }).join("");
+
+  const respostasTxt = Q.itens.map(it => {
+    const v = respostas["q" + it.id];
+    const j = (justifs[it.id] || "").trim();
+    return `${it.id}. [${v}] (${it.saber}) ${it.t}` + (j ? `\n   -> ${j}` : "");
+  }).join("\n");
+  const niveisTxt = Q.dimensoes.map(d => `${d.nome}: ${pct[d.id]}% (${nivelDe(pct[d.id]).nome})`).join("\n");
+  const trilhaTxt = ordenadas.map((d, i) => {
+    const nv = nivelDe(pct[d.id]);
+    return `${i + 1}. ${d.nome} [${nv.nome}] -> ${(Q.desafios[d.id] || {})[tierDoNivel(nv.nome)] || ""}`;
+  }).join("\n");
+  const codigo = "OFICINA-IA|" + nome + "|" + Q.dimensoes.map(d => d.id + ":" + pct[d.id]).join(",") + "|geral:" + geral;
+  const comprovante =
+`PASSAPORTE DE SABERES DIGITAIS E USO DE IA
+Nome: ${nome}
+Data: ${new Date().toLocaleString("pt-BR")}
+Perfil geral: ${nivelGeral.nome} (${geral}%)
+
+NÍVEIS POR DIMENSÃO
+${niveisTxt}
+
+TRILHA DE DESAFIOS PERSONALIZADA (prioridade de baixo para cima)
+${trilhaTxt}
+
+Código de entrega: ${codigo}
+
+RESPOSTAS E JUSTIFICATIVAS (nota 0–4)
+${respostasTxt}
+
+Bases: Matriz de Saberes Digitais Docentes (MEC, 2024); Marco de competências em IA para professores (UNESCO, 2024).
+Autodiagnóstico MEC: https://avamec.mec.gov.br/#/autodiagnostico`;
+
+  salvarLocal("autodiagnostico", { nome, data: new Date().toISOString(), pct, geral, perfil: nivelGeral.nome, justifs });
+
+  const recursosHtml = ordenadas.slice(0, 3).map(d => {
+    const r = (OFICINA.recursos || {})[d.id];
+    if (!r) return "";
+    return `<div class="tema-card">
+      <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
+        <div style="text-align:center">${qrImg(r.url, 132)}</div>
+        <div style="flex:1;min-width:190px">
+          <strong>${d.nome}</strong>
+          <span class="pill">${pct[d.id]}% · ${nivelDe(pct[d.id]).nome}</span>
+          <p class="ajuda" style="margin:.35rem 0">${r.txt}</p>
+          <a href="${r.url}" target="_blank" rel="noopener" style="word-break:break-all">${r.url}</a>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+
+  const foco = ordenadas[0], foco2 = ordenadas[1];
+  const cor = nivelGeral.cor;
+
+  // Missão e código gerados a partir do RESULTADO (prioridade + nome)
+  const prDim = ordenadas[0];
+  const listaCod = OFICINA.turmaPadrao || [];
+  const nomeMissao = listaCod.length ? listaCod[hashStr(nome) % listaCod.length] : "?";
+  const papelMissao = papelPorId(papelDoCodinome(nomeMissao) || (papeisAtivos()[0] || {}).id || "C1");
+  const codigoMissao = gerarCodigoParaCodinome(nomeMissao);
+  const linksMissao = (OFICINA.linksAtividade || {})[papelMissao.id] || [];
+  const missaoHtml = `
+    <section class="card">
+      <h2>Sua missão (gerada pelo seu resultado)</h2>
+      <p class="ajuda">Sua prioridade é <strong>${prDim.nome}</strong> — por isso sua missão dialoga com ela.</p>
+      <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
+        <div style="text-align:center">${emblemaSVG(nomeMissao, 86)}</div>
+        <div style="flex:1;min-width:220px">
+          <strong>${nomeMissao}</strong> <span class="pill">${papelMissao.id}</span>
+          <p style="margin:.3rem 0"><strong>${papelMissao.titulo}</strong></p>
+          <p class="ajuda" style="margin:.2rem 0">${papelMissao.pergunta}</p>
+          <div class="callout ok" style="text-align:center;margin:.5rem 0">
+            <p style="margin:0 0 .2rem;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em">Seu código de acesso</p>
+            <p style="margin:0;font-family:monospace;font-size:1.5rem;font-weight:800;letter-spacing:.12em;color:var(--verde)">${codigoMissao}</p>
+            <p class="ajuda" style="margin:.35rem 0 .45rem"><strong>Copie este código</strong> — ele é necessário para <strong>realizar a sua missão</strong> em “Minha missão”.</p>
+            <button class="btn ghost" id="btnCopiarCodigo">Copiar código</button>
+          </div>
+          <p style="margin-top:.6rem"><a class="btn verde" href="sorteio.html">Abrir “Minha missão”</a></p>
+        </div>
+      </div>
+    </section>`;
+
+  areaEl.style.display = "none";
+  const detalhes = (window.OFICINA_CONFIG || {}).mostrarDetalhesResultado !== false;
+  document.getElementById("resultado").innerHTML = `
+    <section class="card">
+      ${gauge(geral)}
+      <p style="text-align:center;margin:.4rem 0 .2rem">
+        <span class="nivel-badge" style="background:${cor}">${nivelGeral.nome} — ${geral}%</span>
+      </p>
+      <p class="gauge-desc">${nivelGeral.desc}</p>
+      <div class="prioridade"><strong>Prioridades:</strong> comece por <strong>${foco.nome}</strong>
+      e depois <strong>${foco2.nome}</strong>.</div>
+      <p class="ajuda" style="text-align:center;margin:.6rem 0 .2rem">Passe o cursor nos selos para ver cada dimensão:</p>
+      ${resumo}
+      ${badgesHtml}
+      <p style="text-align:center;margin:.8rem 0 .2rem">
+        <button class="btn verde" id="btnEnviarTopo">Enviar meu resultado à professora</button>
+      </p>
+    </section>
+    ${(window.OFICINA_CONFIG || {}).mostrarMissao === false ? "" : missaoHtml}
+    ${detalhes ? `
+    <section class="card">
+      <h2>Sua trilha de desafios</h2>
+      <p>Desafios ajustados ao nível obtido em cada dimensão (do nível mais baixo ao mais alto).</p>
+      ${trilha}
+    </section>
+    <section class="card">
+      <h2>Recursos para as suas fragilidades</h2>
+      <p class="ajuda">Aponte a câmera do celular para o QR Code: ele abre um recurso ligado à dimensão em que você mais pode crescer.</p>
+      ${recursosHtml}
+    </section>
+    <section class="card">
+      <h2>Bilhete de Saída</h2>
+      <p>Copie, baixe ou envie o código abaixo no ambiente da turma — é o seu bilhete de saída desta etapa.</p>
+      <textarea id="comprovante" style="min-height:240px">${comprovante}</textarea>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem">
+        <button class="btn verde" id="btnEnviar">Enviar por e-mail para a professora</button>
+        <button class="btn" id="btnCopiar">Copiar</button>
+        <button class="btn ghost" id="btnBaixar">Baixar .txt</button>
+        <button class="btn ghost" onclick="window.print()">Imprimir</button>
+      </div>
+      <p class="ajuda" style="margin-top:.6rem">Código curto: <code>${codigo}</code></p>
+    </section>` : ""}
+    <p style="text-align:center;margin-top:1rem">
+      ${(window.OFICINA_CONFIG || {}).mostrarLeitura === false ? "" : `<a class="btn verde" href="leitura.html">Leitura →</a>`}
+      ${(window.OFICINA_CONFIG || {}).mostrarExploracao === false ? "" : `<a class="btn verde" href="exploracao.html">Exploração mediada →</a>`}
+      ${(window.OFICINA_CONFIG || {}).mostrarMissao === false ? "" : `<a class="btn verde" href="sorteio.html">Minha missão →</a>`}
+    </p>`;
+  const bc = document.getElementById("btnCopiar"); if (bc) bc.onclick = e => copiarTexto(comprovante, e.target);
+  const bb = document.getElementById("btnBaixar"); if (bb) bb.onclick = () => baixarArquivo("bilhete-de-saida.txt", comprovante);
+  const bcCod = document.getElementById("btnCopiarCodigo");
+  if (bcCod) bcCod.onclick = e => copiarTexto(codigoMissao, e.target);
+  const enviarDiag = e => enviarResultado({
+    tipo: "autodiagnostico", nome, ts: new Date().toISOString(),
+    perfil: nivelGeral.nome, geral, pct, prioridades: [foco.nome, foco2.nome],
+    bases: "MEC+UNESCO", resumo: comprovante
+  }, e.target);
+  const be = document.getElementById("btnEnviar"); if (be) be.onclick = enviarDiag;
+  const bTop = document.getElementById("btnEnviarTopo");
+  if (bTop) bTop.onclick = enviarDiag;
+  concluirEtapa("diagnostico");
+  document.getElementById("resultado").scrollIntoView({ behavior: "smooth" });
+}
+
+gateEtapa("diagnostico");
+</script>
+</body>
+</html>

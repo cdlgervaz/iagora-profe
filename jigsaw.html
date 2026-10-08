@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>IAgora, profe?! — Jigsaw</title>
+<link rel="stylesheet" href="assets/style.css?v67" />
+</head>
+<body>
+<header class="topo">
+  <div class="wrap">
+    <p class="marca">IAgora, profe?!</p>
+    <h1>Jigsaw — 9 papéis, 3 temas</h1>
+    <p>Cada uma vira especialista de um documento e de uma IA; depois ensina as colegas.</p>
+    <nav id="nav"></nav>
+  </div>
+</header>
+
+<main>
+  <div class="aviso">
+    <strong>Versão em fase de testes.</strong> Material para avaliação e uso acadêmico; <strong>não</strong> pode ser usado comercialmente. <a href="termos.html">Termos de uso e como citar</a>.
+  </div>
+  <section class="card">
+    <h2>Como funciona o Jigsaw (quebra-cabeça)</h2>
+    <ol>
+      <li><strong>Grupos de especialistas (por tema):</strong> quem tem o mesmo tema se junta para
+      aprofundar e preparar uma explicação curta.</li>
+      <li><strong>Grupos de casa (mistos):</strong> cada grupo recebe uma especialista de cada tema
+      (A, B e C) e todas ensinam e aprendem umas com as outras.</li>
+      <li><strong>Matriz crítica:</strong> juntas preenchem a tabela “direito → risco → comportamento
+      da IA → decisão”.</li>
+    </ol>
+    <div class="callout">Ninguém lê tudo, mas <strong>todas saem sabendo de tudo</strong> — porque cada
+    uma é responsável por ensinar a sua parte. Isso é interdependência positiva (metodologia ativa).</div>
+  </section>
+
+  <section class="card">
+    <h2>Os 3 temas</h2>
+    <div class="grid cols-3">
+      <div class="card" style="margin:0"><h3>Tema A</h3><p>IA: origens, tipos e infraestrutura</p><p class="ajuda">Papéis A1, A2, A3</p></div>
+      <div class="card" style="margin:0"><h3>Tema B</h3><p>Desafios críticos</p><p class="ajuda">Papéis B1, B2, B3</p></div>
+      <div class="card" style="margin:0"><h3>Tema C</h3><p>Documentos orientadores</p><p class="ajuda">Papéis C1, C2, C3</p></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Os 9 papéis (clique para abrir)</h2>
+    <div id="listaPapeis"></div>
+  </section>
+
+  <section class="card">
+    <h2>Matriz crítica (para preencher juntas no encontro)</h2>
+    <table class="tabela">
+      <tr><th>Documento / direito</th><th>Risco que ele tenta evitar</th><th>Como a IA se comporta</th><th>Nossa decisão</th></tr>
+      <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+      <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+      <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    </table>
+    <p class="ajuda">Imprima o arquivo <code>impressos/matriz-critica.html</code> para usar em papel.</p>
+  </section>
+
+  <section class="card sem-print" id="fimTrilha">
+    <h2>Concluir a trilha</h2>
+    <p>Esta é a última etapa. Ao concluir, você libera a <strong>navegação livre</strong> — poderá
+    voltar a qualquer página quantas vezes quiser antes da oficina.</p>
+    <button class="btn verde" id="btnConcluir">Concluir a trilha</button>
+    <p id="msgFim" class="ajuda"></p>
+  </section>
+</main>
+
+<footer class="rodape">
+  <p><strong>Fontes:</strong> Matriz de Saberes Digitais Docentes (MEC) e Marco de competências em IA para professores (UNESCO).</p>
+  <p>© 2026 Camila Gervaz. Todos os direitos reservados. <strong>Versão em fase de testes</strong> — sem uso comercial e sem alterações sem autorização. <a href="termos.html">Termos de uso e como citar</a>.</p>
+</footer>
+
+<script src="assets/data.js?v67"></script>
+<script src="assets/app.js?v67"></script>
+<script>
+renderNav("Jigsaw");
+
+const btnConcluir = document.getElementById("btnConcluir");
+if (btnConcluir) btnConcluir.onclick = () => {
+  concluirEtapa("jigsaw");
+  document.getElementById("msgFim").innerHTML = "Trilha concluída! <strong>Navegação livre liberada</strong> — volte a qualquer etapa quando quiser.";
+  renderNav("Jigsaw");
+};
+gateEtapa("jigsaw");
+
+/* Lista de papéis em accordions */
+const lista = document.getElementById("listaPapeis");
+const temas = { A: "Tema A — Origens, tipos e infraestrutura", B: "Tema B — Desafios críticos", C: "Tema C — Documentos orientadores" };
+Object.keys(temas).forEach(t => {
+  const h = document.createElement("h3");
+  h.textContent = temas[t];
+  h.style.marginTop = "1rem";
+  lista.appendChild(h);
+  OFICINA.papeis.filter(p => p.tema === t).forEach(p => {
+    const det = document.createElement("details");
+    det.style.cssText = "border:1px solid var(--borda);border-radius:10px;margin:.4rem 0;padding:.5rem .8rem;background:#fff";
+    det.innerHTML = `<summary style="cursor:pointer;font-weight:600">${p.id} — ${p.titulo} <span class="ajuda">(${p.ia.split("—")[0].trim()})</span></summary><div class="corpo"></div>`;
+    det.addEventListener("toggle", () => {
+      if (det.open && !det.dataset.preenchido) {
+        renderPapel(p, det.querySelector(".corpo"));
+        det.dataset.preenchido = "1";
+      }
+    });
+    lista.appendChild(det);
+  });
+});
+
+/* A distribuição de codinomes é apenas da professora (não é exibida às alunas). */
+</script>
+</body>
+</html>
