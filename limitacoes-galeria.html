@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>IAgora, profe?! — Galeria da atividade (professora)</title>
+<link rel="stylesheet" href="assets/style.css?v92" />
+<style>
+  #trilhaWidget { display: none !important; }
+  .lia-card { border: 1px solid #e2e8f0; border-radius: 12px; padding: .9rem 1rem; margin: .7rem 0; background: #fff; }
+  .lia-card > header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid #eef2ff; padding-bottom: .3rem; margin-bottom: .5rem; }
+  .lia-card > header strong { color: #312e81; }
+  .lia-card > header small { color: #94a3b8; }
+  .lia-caso { margin: .5rem 0; }
+  .lia-caso h4 { margin: .2rem 0 .3rem; font-size: .98rem; color: #312e81; }
+  .lia-foco { font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; color: #4338ca; font-weight: 800; }
+  .lia-q { display: grid; grid-template-columns: 34% 66%; gap: .5rem; margin: .25rem 0; }
+  .lia-perg { font-size: .84rem; color: #475569; }
+  .lia-resp { font-size: .92rem; }
+  .lia-tipos, .lia-crit { margin: .3rem 0; font-size: .9rem; }
+  .lia-card.proj .lia-resp { font-size: 1.5rem; }
+  .lia-card.proj .lia-perg { font-size: 1.05rem; }
+  .lia-card.proj > header strong { font-size: 1.6rem; }
+  .lia-card.proj .lia-caso h4 { font-size: 1.3rem; }
+  .lia-bar { display: flex; flex-wrap: wrap; gap: .6rem 1rem; align-items: center; margin: .6rem 0; }
+  @media (max-width: 640px) { .lia-q { grid-template-columns: 1fr; gap: 0; } }
+  @media print { .nao-print { display: none !important; } .lia-card { break-inside: avoid; } }
+</style>
+</head>
+<body>
+<header class="topo">
+  <div class="wrap">
+    <p class="marca">IAgora, profe?!</p>
+    <h1>Galeria da atividade — Limitações no uso da IA</h1>
+    <p>Painel da professora: cole os códigos recebidos (ou importe o arquivo) e mostre as respostas para a turma.</p>
+  </div>
+</header>
+
+<main>
+  <section class="card" id="trava">
+    <h2>Acesso restrito</h2>
+    <p>Digite o <strong>código da professora</strong>.</p>
+    <input type="text" id="codigoAcesso" placeholder="código de acesso" autocomplete="off" />
+    <p style="margin-top:.8rem">
+      <button class="btn" id="btnAcesso">Entrar</button>
+      <span class="ajuda" id="msgAcesso" style="margin-left:.6rem"></span>
+    </p>
+  </section>
+
+  <div id="app" hidden>
+    <section class="card nao-print">
+      <h2>1. Reunir as respostas</h2>
+      <p class="ajuda">Cole abaixo um ou mais <strong>códigos de entrega</strong> (um por linha) ou o conteúdo do e-mail/CSV exportado do Web3Forms. Também é possível importar um arquivo.</p>
+      <textarea id="codes" style="min-height:130px" placeholder="OIA1:...&#10;OIA1:..."></textarea>
+      <div class="lia-bar">
+        <button class="btn verde" id="btnAnalisar">Analisar respostas</button>
+        <label class="btn ghost" style="cursor:pointer">Importar arquivo<input type="file" id="file" accept=".txt,.csv,.json" hidden></label>
+        <button class="btn ghost" id="btnExport">Exportar JSON</button>
+        <button class="btn ghost" id="btnLimpar">Limpar</button>
+      </div>
+      <div class="lia-bar">
+        <label><input type="checkbox" id="proj"> <strong>Modo projetor</strong> (letras grandes)</label>
+        <label>Filtrar caso:
+          <select id="filtro">
+            <option value="">Todos</option>
+          </select>
+        </label>
+        <span class="ajuda" id="contagem"></span>
+        <button class="btn ghost" id="btnPrint">Imprimir / PDF</button>
+      </div>
+    </section>
+
+    <section id="saida">
+      <p class="ajuda">Nenhuma resposta analisada ainda.</p>
+    </section>
+  </div>
+</main>
+
+<footer class="rodape">
+  <p>© 2026 Camila Gervaz. <strong>Versão em fase de testes.</strong> <a href="termos.html">Termos de uso e como citar</a>.</p>
+</footer>
+
+<script src="assets/config.js?v92"></script>
+<script src="assets/data.js?v92"></script>
+<script src="assets/app.js?v92"></script>
+<script src="assets/limitacoes.js?v92"></script>
+<script>
+(function () {
+  "use strict";
+  function h(s) { var x = 2166136261; for (var i = 0; i < s.length; i++) { x ^= s.charCodeAt(i); x = Math.imul(x, 16777619); } return x >>> 0; }
+  var CODIGO_ESPERADO = 4189888726; /* FLM6114 */
+
+  function getK() { try { return new URLSearchParams(location.search).get("k") || ""; } catch (e) { return ""; } }
+  var dados = [];
+  var codesEl = document.getElementById("codes");
+  var saida = document.getElementById("saida");
+  var filtro = document.getElementById("filtro");
+  filtro.innerHTML = '<option value="">Todos</option>' + LIA.CASOS.map(function (c) {
+    return '<option value="' + c.id + '">' + c.titulo + "</option>";
+  }).join("");
+
+  try { codesEl.value = localStorage.getItem("lia_galeria_codes") || ""; } catch (e) {}
+
+  function analisar() {
+    var txt = codesEl.value || "";
+    try { localStorage.setItem("lia_galeria_codes", txt); } catch (e) {}
+    var codigos = LIA.extrairCodigos(txt);
+    dados = [];
+    codigos.forEach(function (c) {
+      var p = OficinaUtil.decodificarEntrega(c);
+      if (p && (p.casos || p.tipo === "limitacoes")) dados.push(p);
+    });
+    render();
+  }
+
+  function render() {
+    var proj = document.getElementById("proj").checked;
+    var f = filtro.value;
+    if (!dados.length) {
+      saida.innerHTML = "<p class='ajuda'>Nenhuma resposta válida encontrada. Confira se colou os códigos completos (começam com <code>OIA1:</code>).</p>";
+      document.getElementById("contagem").textContent = "";
+      return;
+    }
+    saida.innerHTML = dados.map(function (p) { return LIA.studentCard(p, proj, f); }).join("");
+    document.getElementById("contagem").textContent = dados.length + " resposta(s).";
+  }
+
+  document.getElementById("btnAnalisar").onclick = analisar;
+  document.getElementById("proj").onchange = render;
+  filtro.onchange = render;
+  document.getElementById("btnLimpar").onclick = function () {
+    codesEl.value = ""; dados = [];
+    try { localStorage.removeItem("lia_galeria_codes"); } catch (e) {}
+    render();
+  };
+  document.getElementById("btnExport").onclick = function () {
+    OficinaUtil.baixarArquivo("respostas-limitacoes.json", JSON.stringify(dados, null, 2));
+  };
+  document.getElementById("btnPrint").onclick = function () { window.print(); };
+  document.getElementById("file").onchange = function () {
+    var f = this.files && this.files[0]; if (!f) return;
+    var fr = new FileReader();
+    fr.onload = function () { codesEl.value = fr.result; analisar(); };
+    fr.readAsText(f);
+  };
+
+  /* --- trava --- */
+  var desbloqueado = false;
+  try { desbloqueado = localStorage.getItem("lia_galeria_unlock") === "1"; } catch (e) {}
+  if (h(getK()) === CODIGO_ESPERADO) { desbloqueado = true; try { localStorage.setItem("lia_galeria_unlock", "1"); } catch (e) {} }
+
+  function abrir() { document.getElementById("trava").hidden = true; document.getElementById("app").hidden = false; if (codesEl.value) analisar(); }
+  function bloquear() { document.getElementById("trava").hidden = false; document.getElementById("app").hidden = true; }
+
+  if (desbloqueado) abrir(); else bloquear();
+
+  document.getElementById("btnAcesso").onclick = function () {
+    var c = (document.getElementById("codigoAcesso").value || "").trim();
+    if (h(c) === CODIGO_ESPERADO) { try { localStorage.setItem("lia_galeria_unlock", "1"); } catch (e) {} abrir(); }
+    else document.getElementById("msgAcesso").textContent = "Código incorreto.";
+  };
+  document.getElementById("codigoAcesso").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") document.getElementById("btnAcesso").click();
+  });
+})();
+</script>
+</body>
+</html>

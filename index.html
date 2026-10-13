@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>IAgora, profe? — Desafios e potencialidades da IA no ensino e aprendizagem de línguas</title>
+<link rel="stylesheet" href="assets/style.css?v92" />
+<style>
+  #trilhaWidget { display: none !important; }
+  .hub-abas { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .8rem; }
+  .hub-aba { border: 2px solid rgba(255,255,255,.4); background: transparent; border-radius: 999px; padding: .5rem 1.2rem; cursor: pointer; font-weight: 800; color: #e5e7eb; font-size: 1rem; }
+  .hub-aba.ativa { border-color: #fde68a; background: #fde68a; color: #7c2d12; }
+  .prep-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: .7rem; margin: .6rem 0; }
+  .prep-link { display: block; border: 1px solid #e2e8f0; border-left: 6px solid #4338ca; border-radius: 12px; padding: .8rem 1rem; background: #fff; text-decoration: none; color: #1e293b; }
+  .prep-link strong { color: #312e81; }
+  #oficinaFrame { width: 100%; border: 0; min-height: 600px; display: block; }
+</style>
+</head>
+<body>
+<header class="topo">
+  <div class="wrap">
+    <h1>Desafios e potencialidades da inteligência artificial no contexto do ensino e aprendizagem de línguas</h1>
+    <p><strong>IAgora, profe?!</strong> — atividades da oficina e de preparação</p>
+    <nav class="hub-abas" id="hubAbas">
+      <button class="hub-aba ativa" data-aba="inicio">Início</button>
+      <button class="hub-aba" data-aba="oficina">Oficina</button>
+      <button class="hub-aba" data-aba="prep">Preparação</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="aviso">
+    <strong>Versão em fase de testes.</strong> Material para avaliação e uso acadêmico; <strong>não</strong>
+    pode ser usado comercialmente. <a href="termos.html">Termos de uso e como citar</a>.
+  </div>
+
+  <!-- ===================== INÍCIO ===================== -->
+  <div id="aba-inicio">
+    <section class="exp-hero">
+      <h2>Olá! Seja bem-vinda.</h2>
+      <p>Este é o site da oficina <strong>“Desafios e potencialidades da IA no ensino e aprendizagem de línguas”</strong>.
+      Use as abas do topo: <strong>Preparação</strong> (atividades antes do encontro) e <strong>Oficina</strong>
+      (atividades do dia). Qualquer dúvida, escreva para <a href="mailto:cgervaz@proton.me">cgervaz@proton.me</a>.</p>
+    </section>
+
+    <section class="card">
+      <h2>Autoria e declaração de uso de IA</h2>
+      <p>Este material foi desenvolvido pela <strong>professora Camila Gervaz</strong>,
+      <strong>doutoranda da USP</strong>, para esta oficina.</p>
+      <p><strong>Declaração de uso de IA:</strong> em transparência, o material e o site foram
+      organizados pela autoria com apoio de <strong>assistência de IA generativa</strong> (assistente de
+      código <em>opencode</em>, modelo <em>DeepSeek-Flash</em>) na implementação da ferramenta e da
+      interface. Os conteúdos, instrumentos e roteiros foram definidos pela autoria a partir de
+      <strong>fontes oficiais</strong> indicadas nas seções correspondentes. Os resultados devem ser conferidos na fonte.</p>
+    </section>
+  </div>
+
+  <!-- ===================== PREPARAÇÃO ===================== -->
+  <div id="aba-prep" hidden>
+    <section class="card">
+      <h2>Preparação (antes do encontro)</h2>
+      <p>Faça estas atividades <strong>antes</strong> da oficina. Elas preparam a nossa conversa e as práticas do dia.</p>
+      <div class="prep-links">
+        <a class="prep-link" href="sondagem.html"><strong>1. Sondagem inicial</strong><br><span class="ajuda">Sua percepção sobre o uso de IA.</span></a>
+        <a class="prep-link" href="autodiagnostico.html"><strong>2. Autodiagnóstico</strong><br><span class="ajuda">Saberes digitais e uso de IA (envio obrigatório).</span></a>
+        <a class="prep-link" href="leitura.html"><strong>3. Leitura</strong><br><span class="ajuda">Capítulo 1 — <em>Inteligência Artificial na Educação Básica</em> (MEC).</span></a>
+      </div>
+      <div class="callout" style="margin-top:.6rem"><strong>Atenção!</strong> Ao realizar as atividades, faça sempre o
+      <strong>envio para a professora</strong>.</div>
+      <p style="text-align:center;margin-top:1rem"><button class="btn verde" id="btnIniciar">Começar a preparação</button></p>
+    </section>
+  </div>
+
+  <!-- ===================== OFICINA ===================== -->
+  <div id="aba-oficina" hidden>
+    <iframe id="oficinaFrame" src="oficina.html?embed=1" title="Atividades da oficina (Etapas I a IV)"></iframe>
+    <p class="ajuda" style="text-align:center;margin-top:.6rem">
+      Se o conteúdo não aparecer, <a href="oficina.html" target="_blank" rel="noopener">abra as atividades da oficina em uma nova aba</a>.
+    </p>
+  </div>
+</main>
+
+<footer class="rodape">
+  <p><strong>Fontes:</strong> Matriz de Saberes Digitais Docentes (MEC) e Marco de competências em IA para professores (UNESCO).</p>
+  <p>© 2026 Camila Gervaz. Todos os direitos reservados. <strong>Versão em fase de testes</strong> — sem uso comercial e sem alterações sem autorização. <a href="termos.html">Termos de uso e como citar</a>.</p>
+</footer>
+
+<script src="assets/config.js?v92"></script>
+<script src="assets/data.js?v92"></script>
+<script src="assets/app.js?v92"></script>
+<script>
+/* ---------- abas do cabeçalho: Início / Preparação / Oficina ---------- */
+function mostrarAba(a) {
+  document.getElementById("aba-inicio").hidden = (a !== "inicio");
+  document.getElementById("aba-prep").hidden = (a !== "prep");
+  document.getElementById("aba-oficina").hidden = (a !== "oficina");
+  document.querySelectorAll(".hub-aba").forEach(function (b) { b.classList.toggle("ativa", b.dataset.aba === a); });
+  if (a === "oficina") ajustarIframe();
+  try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch (e) {}
+}
+document.querySelectorAll(".hub-aba").forEach(function (b) {
+  b.addEventListener("click", function () { mostrarAba(b.dataset.aba); });
+});
+try {
+  var q = new URLSearchParams(location.search).get("aba");
+  if (q === "oficina" || q === "prep" || q === "inicio") mostrarAba(q);
+} catch (e) {}
+
+/* ---------- ajusta a altura do iframe da oficina ---------- */
+function ajustarIframe() {
+  try {
+    var f = document.getElementById("oficinaFrame"); if (!f) return;
+    var d = f.contentDocument || (f.contentWindow && f.contentWindow.document);
+    if (d && d.body) f.style.height = (d.body.scrollHeight + 24) + "px";
+  } catch (e) {}
+}
+(function () {
+  var f = document.getElementById("oficinaFrame");
+  if (f) { f.addEventListener("load", ajustarIframe); setInterval(ajustarIframe, 1000); }
+})();
+
+document.getElementById("btnIniciar").onclick = function () {
+  concluirEtapa("inicio");
+  location.href = "sondagem.html";
+};
+
+/* Se já terminou tudo, mostra aviso de navegação livre */
+if (tudoLiberado()) {
+  var a = document.querySelector("#aba-inicio .exp-hero p");
+  if (a) a.innerHTML += " <strong>Você já concluiu a trilha — navegue livremente!</strong>";
+}
+</script>
+</body>
+</html>

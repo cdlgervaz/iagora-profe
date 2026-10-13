@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>IAgora, profe?! — Limitações no uso da IA</title>
+<link rel="stylesheet" href="assets/style.css?v92" />
+<style>
+  #trilhaWidget { display: none !important; }
+  .lia-casos { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: .9rem; }
+  .lia-caso-not { border: 1px solid #e2e8f0; border-left: 6px solid #4338ca; border-radius: 10px; padding: .8rem .9rem; background: #fff; }
+  .lia-caso-not h3 { margin: 0 0 .3rem; font-size: 1rem; }
+  .lia-caso-not p { margin: .2rem 0; font-size: .92rem; }
+  .lia-foco { font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: #4338ca; font-weight: 800; display: block; }
+  .lia-fonte { color: #64748b; font-size: .78rem; }
+  .lia-form-caso { border: 1px solid #e2e8f0; border-radius: 10px; padding: .8rem .9rem; margin: .7rem 0; }
+  .lia-form-caso h3 { margin: 0 0 .2rem; font-size: 1.02rem; }
+  .lia-form-caso label { font-size: .86rem; margin-top: .5rem; display: block; }
+  .lia-form-caso textarea { min-height: 64px; }
+  .lia-tipos-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: .3rem; margin: .4rem 0; }
+  .lia-tipos-list label { display: flex; gap: .4rem; align-items: center; font-size: .92rem; }
+  .lia-card { border: 1px solid #e2e8f0; border-radius: 12px; padding: .9rem 1rem; margin: .7rem 0; background: #fff; }
+  .lia-card > header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid #eef2ff; padding-bottom: .3rem; margin-bottom: .5rem; }
+  .lia-card > header strong { color: #312e81; }
+  .lia-card > header small { color: #94a3b8; }
+  .lia-caso { margin: .5rem 0; }
+  .lia-caso h4 { margin: .2rem 0 .3rem; font-size: .98rem; color: #312e81; }
+  .lia-q { display: grid; grid-template-columns: 38% 62%; gap: .5rem; margin: .25rem 0; }
+  .lia-perg { font-size: .84rem; color: #475569; }
+  .lia-resp { font-size: .92rem; }
+  @media (max-width: 640px) { .lia-q { grid-template-columns: 1fr; gap: 0; } }
+</style>
+</head>
+<body>
+<header class="topo">
+  <div class="wrap">
+    <p class="marca">IAgora, profe?!</p>
+    <h1>Limitações no uso da IA — notícias do Brasil e da América Latina</h1>
+    <p>Leia as notícias, discuta com o grupo e preencha a ficha. Suas respostas podem ser compartilhadas com a turma.</p>
+    <nav id="nav"></nav>
+  </div>
+</header>
+
+<main>
+  <div class="aviso">
+    <strong>Versão em fase de testes.</strong> Material para avaliação e uso acadêmico;
+    <strong>não</strong> pode ser usado comercialmente. <a href="termos.html">Termos de uso e como citar</a>.
+  </div>
+
+  <section class="card" id="trava">
+    <h2>Acesso à atividade</h2>
+    <p>Digite o <strong>código de acesso</strong> combinado em aula.</p>
+    <input type="text" id="codigoAcesso" placeholder="código de acesso" autocomplete="off" />
+    <p style="margin-top:.8rem">
+      <button class="btn" id="btnAcesso">Entrar</button>
+      <span class="ajuda" id="msgAcesso" style="margin-left:.6rem"></span>
+    </p>
+  </section>
+
+  <div id="app" hidden>
+    <section class="card">
+      <h2>1. Leia as notícias</h2>
+      <p class="ajuda">Clique nos links para abrir a reportagem. Você pode voltar e preencher a ficha depois.</p>
+      <div id="listaCasos" class="lia-casos"></div>
+    </section>
+
+    <section class="card">
+      <h2>2. Preencha a ficha</h2>
+      <label for="nome">Seu nome</label>
+      <input type="text" id="nome" placeholder="Como você quer ser chamada?" autocomplete="off" />
+
+      <div id="formCasos"></div>
+
+      <h3>Tipos de limitação (marque os que apareceram)</h3>
+      <div id="tiposList" class="lia-tipos-list"></div>
+
+      <label for="criterio">Nosso critério coletivo (1 frase)</label>
+      <textarea id="criterio" style="min-height:90px" placeholder="O que a turma concluiu?"></textarea>
+
+      <p style="text-align:center;margin-top:1rem">
+        <button class="btn verde" id="btnEnviar">Enviar e gerar link</button>
+        <button class="btn ghost" id="btnRascunho">Salvar rascunho</button>
+        <button class="btn ghost" id="btnLimpar">Limpar</button>
+        <span class="ajuda" id="msg" style="display:block;margin-top:.5rem"></span>
+      </p>
+    </section>
+
+    <section class="card" id="resultado" hidden>
+      <h2>Pronto! Compartilhe com a turma</h2>
+      <p class="ajuda">Envie as respostas para a professora e/ou compartilhe o link abaixo para que a turma visualize.</p>
+      <p>
+        <button class="btn" id="btnCopiarCodigo">Copiar código</button>
+        <button class="btn ghost" id="btnCopiarLink">Copiar link</button>
+      </p>
+      <label for="codigoBox">Código de entrega</label>
+      <textarea id="codigoBox" readonly style="min-height:70px"></textarea>
+      <label for="linkBox">Link para visualizar/compartilhar</label>
+      <input id="linkBox" readonly />
+      <div id="qrBox" style="text-align:center;margin-top:.6rem"></div>
+      <p style="text-align:center;margin-top:.8rem"><a class="btn ghost" id="btnVer" href="#" target="_blank" rel="noopener">Abrir visualização</a></p>
+    </section>
+
+    <section class="card" id="view" hidden>
+      <h2>Visualização da resposta</h2>
+      <div id="viewBox"></div>
+    </section>
+  </div>
+</main>
+
+<footer class="rodape">
+  <p><strong>Casos:</strong> Itapecerica da Serra (SP) e Elefante Letrado (SP) — 2026; projeção de profissões com IA (Cariacica, ES) — 2025.</p>
+  <p>© 2026 Camila Gervaz. Todos os direitos reservados. <strong>Versão em fase de testes</strong> — sem uso comercial. <a href="termos.html">Termos de uso e como citar</a>.</p>
+</footer>
+
+<script src="assets/config.js?v92"></script>
+<script src="assets/data.js?v92"></script>
+<script src="assets/app.js?v92"></script>
+<script src="assets/limitacoes.js?v92"></script>
+<script>
+(function () {
+  "use strict";
+  var TRILHA_OCULTA = true;
+
+  function h(s) { var x = 2166136261; for (var i = 0; i < s.length; i++) { x ^= s.charCodeAt(i); x = Math.imul(x, 16777619); } return x >>> 0; }
+  var CODIGO_ESPERADO = 4189888726; /* FLM6114 */
+
+  function getK() { try { return new URLSearchParams(location.search).get("k") || ""; } catch (e) { return ""; } }
+  function destravar() { try { localStorage.setItem("lia_unlock", "1"); } catch (e) {} }
+
+  /* modo visualização (link compartilhado) não exige código */
+  var mRead = /^#r=(.+)$/.exec(location.hash || "");
+
+  var app = document.getElementById("app");
+  var trava = document.getElementById("trava");
+  var nome = document.getElementById("nome");
+
+  /* --- construir as notícias --- */
+  var lista = document.getElementById("listaCasos");
+  lista.innerHTML = LIA.CASOS.map(function (c) {
+    var links = c.links.map(function (l) {
+      return '<a class="btn ghost" style="padding:.15rem .5rem;font-size:.8rem" target="_blank" rel="noopener" href="' + l[1] + '">' + l[0] + "</a>";
+    }).join(" ");
+    return '<article class="lia-caso-not">' +
+      '<span class="lia-foco">' + (c.num <= 3 ? "Caso " + c.num + " · " + c.foco : c.titulo) + "</span>" +
+      "<h3>" + (c.num <= 3 ? c.titulo : "Caso 4") + "</h3>" +
+      "<p>" + c.resumo + "</p>" +
+      (links ? '<p style="margin-top:.4rem">' + links + "</p>" : "") +
+      (c.fonte ? '<p class="lia-fonte">Fonte: ' + c.fonte + "</p>" : "") +
+      "</article>";
+  }).join("");
+
+  /* --- construir o formulário --- */
+  var form = document.getElementById("formCasos");
+  form.innerHTML = LIA.CASOS.map(function (c) {
+    var campos = LIA.PERGUNTAS.map(function (q) {
+      return '<label>' + q.t + "</label>" +
+        '<textarea data-caso="' + c.id + '" data-q="' + q.id + '"></textarea>';
+    }).join("");
+    var fonte = c.id === "outro"
+      ? '<label>Nome da fonte (site/veículo e data)</label><input type="text" data-caso="outro" data-q="fonte" />'
+      : "";
+    return '<div class="lia-form-caso">' +
+      "<h3>" + (c.num <= 3 ? "Caso " + c.num + " — " : "") + c.titulo + "</h3>" +
+      '<p class="ajuda">' + c.resumo + "</p>" + campos + fonte + "</div>";
+  }).join("");
+
+  var tiposList = document.getElementById("tiposList");
+  tiposList.innerHTML = LIA.TIPOS.map(function (t, i) {
+    return '<label><input type="checkbox" class="lia-tipo" value="' + t + '" id="tipo' + i + '"> ' + t + "</label>";
+  }).join("");
+
+  /* --- rascunho local --- */
+  function coletar() {
+    var casos = {};
+    LIA.CASOS.forEach(function (c) { casos[c.id] = {}; });
+    form.querySelectorAll("textarea[data-caso], input[data-caso]").forEach(function (el) {
+      casos[el.dataset.caso][el.dataset.q] = el.value;
+    });
+    var tipos = Array.prototype.map.call(document.querySelectorAll(".lia-tipo:checked"), function (x) { return x.value; });
+    return { nome: (nome.value || "").trim(), casos: casos, tipos: tipos, criterio: (document.getElementById("criterio").value || "").trim() };
+  }
+  function aplicar(d) {
+    if (!d) return;
+    if (d.nome) nome.value = d.nome;
+    if (d.casos) Object.keys(d.casos).forEach(function (cid) {
+      Object.keys(d.casos[cid]).forEach(function (q) {
+        var el = form.querySelector('[data-caso="' + cid + '"][data-q="' + q + '"]');
+        if (el) el.value = d.casos[cid][q] || "";
+      });
+    });
+    if (d.tipos) document.querySelectorAll(".lia-tipo").forEach(function (x) { if (d.tipos.indexOf(x.value) >= 0) x.checked = true; });
+    if (d.criterio) document.getElementById("criterio").value = d.criterio;
+  }
+  aplicar(lerLocal("lia_draft"));
+  var salvoNome = lerLocal("nomeAluna"); if (salvoNome && !nome.value) nome.value = salvoNome;
+
+  var tmr;
+  function autoSalvar() { clearTimeout(tmr); tmr = setTimeout(function () { salvarLocal("lia_draft", coletar()); }, 500); }
+  document.getElementById("app").addEventListener("input", autoSalvar);
+
+  document.getElementById("btnRascunho").onclick = function () {
+    salvarLocal("lia_draft", coletar());
+    document.getElementById("msg").textContent = "Rascunho salvo neste navegador.";
+  };
+  document.getElementById("btnLimpar").onclick = function () {
+    if (!confirm("Apagar as respostas deste formulário?")) return;
+    form.querySelectorAll("textarea, input[type=text]").forEach(function (el) { el.value = ""; });
+    document.querySelectorAll(".lia-tipo").forEach(function (x) { x.checked = false; });
+    document.getElementById("criterio").value = "";
+    salvarLocal("lia_draft", null);
+    document.getElementById("msg").textContent = "";
+  };
+
+  function mostrarResultado(codigo, payload) {
+    var link = location.origin + location.pathname + "#r=" + encodeURIComponent(codigo);
+    document.getElementById("codigoBox").value = codigo;
+    document.getElementById("linkBox").value = link;
+    var qr = document.getElementById("qrBox");
+    try { qr.innerHTML = OficinaUtil.qrImg(link, 150); } catch (e) { qr.innerHTML = ""; }
+    document.getElementById("btnVer").href = "#r=" + encodeURIComponent(codigo);
+    document.getElementById("resultado").hidden = false;
+    document.getElementById("viewBox").innerHTML = LIA.studentCard(payload, false);
+    document.getElementById("resultado").scrollIntoView({ behavior: "smooth" });
+  }
+
+  document.getElementById("btnEnviar").onclick = function () {
+    var d = coletar();
+    if (!d.nome) { alert("Informe seu nome."); return; }
+    var payload = { tipo: "limitacoes", nome: d.nome, casos: d.casos, tipos: d.tipos, criterio: d.criterio, ts: new Date().toISOString() };
+    payload.resumo = LIA.buildResumo(payload);
+    salvarLocal("nomeAluna", d.nome);
+    salvarLocal("lia_draft", d);
+    var self = this;
+    var codigo = OficinaUtil.enviarResultado(payload, self);
+    document.getElementById("msg").textContent = "Enviado para a professora. Guarde o código/link abaixo.";
+    mostrarResultado(codigo, payload);
+  };
+  document.getElementById("btnCopiarCodigo").onclick = function () {
+    OficinaUtil.copiarTexto(document.getElementById("codigoBox").value, this);
+  };
+  document.getElementById("btnCopiarLink").onclick = function () {
+    OficinaUtil.copiarTexto(document.getElementById("linkBox").value, this);
+  };
+
+  /* --- trava de acesso --- */
+  function abrir() { trava.hidden = true; app.hidden = false; renderNav(""); }
+  function bloquear() { trava.hidden = false; app.hidden = true; }
+
+  if (mRead) {
+    bloquear();
+    var p = OficinaUtil.decodificarEntrega(decodeURIComponent(mRead[1]));
+    var view = document.getElementById("view");
+    if (p) { document.getElementById("viewBox").innerHTML = LIA.studentCard(p, true); }
+    else { document.getElementById("viewBox").innerHTML = "<p class='ajuda'>Não foi possível ler esta resposta.</p>"; }
+    view.hidden = false;
+    return;
+  }
+
+  var desbloqueado = false;
+  try { desbloqueado = localStorage.getItem("lia_unlock") === "1"; } catch (e) {}
+  if (h(getK()) === CODIGO_ESPERADO) { destravar(); desbloqueado = true; }
+
+  if (desbloqueado) { abrir(); } else { bloquear(); }
+
+  document.getElementById("btnAcesso").onclick = function () {
+    var c = (document.getElementById("codigoAcesso").value || "").trim();
+    if (h(c) === CODIGO_ESPERADO) { destravar(); abrir(); }
+    else { document.getElementById("msgAcesso").textContent = "Código incorreto. Confira com a professora."; }
+  };
+  document.getElementById("codigoAcesso").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") document.getElementById("btnAcesso").click();
+  });
+})();
+</script>
+</body>
+</html>

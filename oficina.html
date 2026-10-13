@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>IAgora, profe?! — Oficina (atividades do encontro)</title>
+<link rel="stylesheet" href="assets/style.css?v92" />
+<script>if (/[?&]embed=1/.test(location.search)) document.documentElement.className += " embed";</script>
+<style>
+  #trilhaWidget { display: none !important; }
+  html.embed .topo, html.embed .rodape, html.embed .aviso { display: none !important; }
+  html.embed main { padding-top: .5rem; }
+  .pos-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: .8rem; }
+  .pos-card { border: 1px solid #e2e8f0; border-left: 6px solid #4338ca; border-radius: 12px; padding: .9rem 1rem; background: #fff; }
+  .pos-card h4 { margin: 0 0 .2rem; color: #312e81; }
+  .pos-foco { font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: #4338ca; font-weight: 800; }
+  .pos-prompt { background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 10px; padding: .6rem .7rem; margin: .5rem 0; font-size: .9rem; white-space: pre-wrap; }
+  .pos-cuidado { font-size: .85rem; color: #7c2d12; background: #fff7ed; border-radius: 8px; padding: .4rem .6rem; }
+  .pos-tools { font-size: .82rem; color: #475569; }
+  .ofi-abas { display: flex; flex-wrap: wrap; gap: .4rem; margin: .6rem 0 1rem; }
+  .ofi-aba { border: 2px solid #cbd5e1; background: #fff; border-radius: 999px; padding: .5rem .9rem; cursor: pointer; font-weight: 800; color: #334155; font-size: .92rem; }
+  .ofi-aba.ativa { border-color: #4338ca; background: #eef2ff; color: #3730a3; }
+  .ofi-grupo { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6rem; }
+  .ofi-gbtn { border: 2px solid #cbd5e1; border-radius: 12px; padding: 1rem; background: #fff; cursor: pointer; font-weight: 800; color: #312e81; }
+  .ofi-gbtn.sel { border-color: #4338ca; background: #eef2ff; }
+  .ofi-barra-grupo { display: flex; justify-content: space-between; align-items: center; background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 12px; padding: .5rem .8rem; margin-bottom: .8rem; }
+  .ofi-not { border: 1px solid #e2e8f0; border-left: 6px solid #4338ca; border-radius: 10px; padding: .8rem .9rem; background: #fff; }
+  .ofi-not h3 { margin: 0 0 .3rem; }
+  .ofi-foco { font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: #4338ca; font-weight: 800; }
+  .ofi-fonte { color: #64748b; font-size: .8rem; }
+  .ofi-grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6rem; }
+  .ofi-col { border: 1px solid #cbd5e1; border-radius: 10px; padding: .6rem; background: #fff; }
+  .ofi-col h4 { margin: 0 0 .3rem; font-size: .86rem; color: #4338ca; }
+  .ofi-col textarea { min-height: 110px; }
+  .tia-progresso { height: 12px; background: #e2e8f0; border-radius: 999px; overflow: hidden; margin: .6rem 0; }
+  .tia-progresso > span { display: block; height: 100%; width: 0; background: linear-gradient(90deg,#4f46e5,#7c3aed); transition: width .25s; }
+  .tia-card { border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.1rem; margin: .7rem 0; background: #fff; text-align: center; }
+  .tia-card .tia-texto { font-size: clamp(1.05rem,2.3vw,1.45rem); }
+  .tia-ops { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
+  .tia-op { border: 2px solid #cbd5e1; border-radius: 12px; padding: .8rem; background: #fff; cursor: pointer; font-weight: 700; }
+  .tia-op .em { display: block; font-size: 1.4rem; }
+  .tia-op.certo { border-color: #16a34a; background: #f0fdf4; }
+  .tia-op.errado { border-color: #dc2626; background: #fef2f2; }
+  .tia-fb { border-radius: 12px; padding: .7rem .9rem; margin-top: .7rem; text-align: left; display: none; }
+  .tia-fb.ok { background: #f0fdf4; border: 1px solid #86efac; display: block; }
+  .tia-fb.no { background: #fef2f2; border: 1px solid #fca5a5; display: block; }
+  @media (max-width: 720px){ .ofi-grupo, .ofi-grid3, .tia-ops { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header class="topo">
+  <div class="wrap">
+    <p class="marca">IAgora, profe?!</p>
+    <h1>Desafios e potencialidades da inteligência artificial no contexto do ensino e aprendizagem de línguas</h1>
+    <p>Atividades do encontro presencial (14h às 18h)</p>
+  </div>
+</header>
+
+<main>
+  <div class="aviso">
+    <strong>Versão em fase de testes.</strong> Material para uso acadêmico; <strong>não</strong> comercial.
+    <a href="termos.html">Termos de uso e como citar</a>.
+  </div>
+
+  <section class="card" id="trava">
+    <h2>Acesso à oficina</h2>
+    <p>Digite o <strong>código da oficina</strong> combinado com a professora.</p>
+    <input type="text" id="codigoAcesso" placeholder="código de acesso" autocomplete="off" />
+    <p style="margin-top:.8rem"><button class="btn" id="btnAcesso">Entrar</button> <span class="ajuda" id="msgAcesso" style="margin-left:.6rem"></span></p>
+  </section>
+
+  <div id="app" hidden>
+    <section class="card" id="grupoBox">
+      <h2>Identifique seu grupo</h2>
+      <p class="ajuda">Escolha o grupo combinado em aula. Você verá apenas os materiais do seu grupo.</p>
+      <div class="ofi-grupo">
+        <button class="ofi-gbtn" data-g="1">Grupo 1</button>
+        <button class="ofi-gbtn" data-g="2">Grupo 2</button>
+        <button class="ofi-gbtn" data-g="3">Grupo 3</button>
+      </div>
+      <p style="margin-top:.8rem">
+        <label for="nomeGrupo" style="font-size:.9rem">Nome do grupo (opcional)</label>
+        <input type="text" id="nomeGrupo" placeholder="Ex.: Vozes" autocomplete="off" />
+        <button class="btn verde" id="btnGrupo">Confirmar</button>
+      </p>
+    </section>
+
+    <div id="oficina">
+      <div class="ofi-barra-grupo">
+        <span class="tia-badge" id="grupoAtual">—</span>
+        <button class="btn ghost" id="btnTrocarGrupo" style="padding:.25rem .6rem;font-size:.85rem">Trocar de grupo</button>
+      </div>
+
+      <div class="ofi-abas" id="abas">
+        <button class="ofi-aba" data-tab="1">Etapa I — Tipos de IA</button>
+        <button class="ofi-aba" data-tab="2">Etapa II — Desafios e limitações</button>
+        <button class="ofi-aba" data-tab="3">Etapa III — Diálogo construtivo</button>
+        <button class="ofi-aba" data-tab="4">Etapa IV — ExperimentAção</button>
+      </div>
+
+      <section class="card" id="home">
+        <h2>Atividades da oficina — escolha uma etapa</h2>
+        <p class="ajuda">Você pode voltar a esta página principal a qualquer momento, ao terminar cada atividade.</p>
+        <div class="ofi-grupo" style="grid-template-columns:1fr 1fr">
+          <button class="ofi-gbtn ofi-home-btn" data-tab="1">Etapa I — Tipos de IA</button>
+          <button class="ofi-gbtn ofi-home-btn" data-tab="2">Etapa II — Desafios e limitações</button>
+          <button class="ofi-gbtn ofi-home-btn" data-tab="3">Etapa III — Diálogo construtivo</button>
+          <button class="ofi-gbtn ofi-home-btn" data-tab="4">Etapa IV — ExperimentAção</button>
+        </div>
+      </section>
+
+      <!-- ================= ETAPA I ================= -->
+      <section class="tab card" id="tab1">
+        <h2>Tipos de IA</h2>
+        <p class="ajuda">Cada grupo recebe 8 exemplos (2 de cada tipo). Classifique: preditiva, generativa, agêntica ou infraestrutura.</p>
+        <div class="tia-topo" style="display:flex;justify-content:space-between;font-weight:700;color:#475569">
+          <span id="t1-contador"></span><span id="t1-placar">0 ponto(s) · 🔥 0</span>
+        </div>
+        <div class="tia-progresso"><span id="t1-barra"></span></div>
+        <div class="tia-card">
+          <p class="ajuda" style="margin:0 0 .4rem">Que tipo de IA está por trás disto?</p>
+          <p class="tia-texto" id="t1-enunciado"></p>
+        </div>
+        <div class="tia-ops" id="t1-opcoes"></div>
+        <div class="tia-fb" id="t1-fb"></div>
+        <p style="text-align:center;margin-top:.9rem"><button class="btn" id="t1-prox" hidden>Próximo →</button></p>
+        <p style="text-align:center;margin-top:1.1rem"><button class="btn ghost ofi-voltar">⬅ Voltar à página principal da oficina</button></p>
+      </section>
+
+      <!-- ================= ETAPA II ================= -->
+      <section class="tab card" id="tab2" hidden>
+        <h2>Desafios e limitações no uso de IA</h2>
+        <p class="ajuda">Seu grupo recebe <strong>uma notícia</strong>. Leia, discuta e analise quais são os <strong>limites e/ou desafios</strong> do uso de IA nesse caso.</p>
+        <div id="t2-noticia"></div>
+
+        <h3 style="margin-top:1rem">Análise do grupo</h3>
+        <label>O que a notícia revela?</label>
+        <textarea id="t2-revela" style="min-height:70px"></textarea>
+        <label>Quais os limites e/ou desafios do uso de IA nesse caso?</label>
+        <textarea id="t2-limites" style="min-height:90px"></textarea>
+        <label>Quem foi afetado e como?</label>
+        <textarea id="t2-afetados" style="min-height:70px"></textarea>
+        <label>Que cuidado/salvaguarda o grupo adotaria?</label>
+        <textarea id="t2-salva" style="min-height:70px"></textarea>
+        <p style="text-align:center;margin-top:1rem">
+          <button class="btn verde" id="t2-enviar">Enviar análise</button>
+          <button class="btn ghost" id="t2-rascunho">Salvar rascunho</button>
+          <span class="ajuda" id="t2-msg" style="display:block;margin-top:.4rem"></span>
+        </p>
+        <p style="text-align:center;margin-top:1.1rem"><button class="btn ghost ofi-voltar">⬅ Voltar à página principal da oficina</button></p>
+      </section>
+
+      <!-- ================= ETAPA III ================= -->
+      <section class="tab card" id="tab3" hidden>
+        <h2>Diálogo construtivo</h2>
+        <p class="ajuda">Retomada da leitura feita antes da aula (Capítulo 1 — <em>Inteligência Artificial na Educação Básica</em>).</p>
+
+        <h3>1) Primeiro, individualmente</h3>
+        <p class="ajuda">Decida o que você quer comentar com o seu grupo.</p>
+        <label>Isso me é familiar / quero compartilhar com o grupo</label>
+        <textarea id="t3-rev-ind-familiar" style="min-height:70px"></textarea>
+        <label>Isso é novo / eu vejo de maneira diferente</label>
+        <textarea id="t3-rev-ind-novo" style="min-height:70px"></textarea>
+        <label>Tenho uma pergunta / dúvida</label>
+        <textarea id="t3-rev-ind-duvida" style="min-height:70px"></textarea>
+
+        <h3 style="margin-top:1rem">2) Agora, em grupo</h3>
+        <p class="ajuda">Comentem as impressões sobre o texto e tomem nota na tabela.</p>
+        <div class="ofi-grid3">
+          <div class="ofi-col"><h4>Isso me é familiar / quero compartilhar</h4><textarea id="t3-g-familiar"></textarea></div>
+          <div class="ofi-col"><h4>Isso é novo / vejo de maneira diferente</h4><textarea id="t3-g-novo"></textarea></div>
+          <div class="ofi-col"><h4>Tenho uma pergunta / dúvida</h4><textarea id="t3-g-duvida"></textarea></div>
+        </div>
+
+        <h3 style="margin-top:1rem">3) Representação gráfica do essencial</h3>
+        <p class="ajuda">Depois do debate, representem graficamente para a turma a informação essencial do grupo (mapa conceitual, diagrama, tabela, imagem ou desenho).</p>
+        <label>Formato escolhido</label>
+        <select id="t3-formato">
+          <option value="">— escolha —</option>
+          <option>Mapa conceitual</option>
+          <option>Diagrama</option>
+          <option>Tabela</option>
+          <option>Imagem</option>
+          <option>Desenho</option>
+        </select>
+        <label>Descreva a representação (ou cole o texto que a acompanha)</label>
+        <textarea id="t3-desc" style="min-height:90px"></textarea>
+        <label>Opcional: envie uma foto/arquivo da representação (pré-visualização)</label>
+        <input type="file" id="t3-file" accept="image/*" />
+        <div id="t3-preview" style="margin-top:.5rem"></div>
+
+        <p style="text-align:center;margin-top:1rem">
+          <button class="btn verde" id="t3-enviar">Enviar diálogo</button>
+          <button class="btn ghost" id="t3-rascunho">Salvar rascunho</button>
+          <span class="ajuda" id="t3-msg" style="display:block;margin-top:.4rem"></span>
+        </p>
+        <p style="text-align:center;margin-top:1.1rem"><button class="btn ghost ofi-voltar">⬅ Voltar à página principal da oficina</button></p>
+      </section>
+
+      <!-- ================= ETAPA IV ================= -->
+      <section class="tab card" id="tab4" hidden>
+        <h2>ExperimentAção</h2>
+        <p class="ajuda">Propostas de experimentação com IA pensando no <strong>ensino e aprendizagem de línguas</strong>. Explore o recurso (possibilidades de uso) e registre a sua experimentação.</p>
+
+        <h3>Exploração do recurso — possibilidades de uso da IA</h3>
+        <p class="ajuda">Escolha um uso, <strong>copie o prompt</strong> e teste na ferramenta de IA; depois confira o resultado e leia os cuidados.</p>
+        <div class="pos-grid">
+          <div class="pos-card">
+            <span class="pos-foco">Planejamento • testar</span>
+            <h4>Adaptar um texto autêntico por nível</h4>
+            <div class="pos-prompt" id="pos1">Adapte o texto a seguir para aprendizes de nível A2, mantendo o sentido original e simplificando vocabulário e estruturas. Liste 5 palavras-chave e escreva 3 perguntas de compreensão.
+Texto: [cole aqui]</div>
+            <p class="pos-tools">Ferramentas: <a class="btn ghost" style="padding:.2rem .6rem;font-size:.82rem" target="_blank" rel="noopener" href="https://duck.ai/">Duck.ai</a> <a class="btn ghost" style="padding:.2rem .6rem;font-size:.82rem" target="_blank" rel="noopener" href="https://chatai.org/pt">chatAI</a></p>
+            <p class="pos-cuidado">Confira se o texto continua fiel e adequado ao nível; revise antes de usar.</p>
+            <button class="btn ghost copiar" data-alvo="pos1">Copiar prompt</button>
+          </div>
+          <div class="pos-card">
+            <span class="pos-foco">Planejamento • testar</span>
+            <h4>Plano de aula de 50 minutos</h4>
+            <div class="pos-prompt" id="pos2">Elabore um plano de aula de 50 minutos para praticar o pretérito perfeito com uma turma de nível B1. Inclua objetivo, aquecimento, atividade principal, prática e fechamento, com materiais e critérios de avaliação.</div>
+            <p class="pos-tools">Ferramentas: <a class="btn ghost" style="padding:.2rem .6rem;font-size:.82rem" target="_blank" rel="noopener" href="https://duck.ai/">Duck.ai</a> <a class="btn ghost" style="padding:.2rem .6rem;font-size:.82rem" target="_blank" rel="noopener" href="https://chatai.org/pt">chatAI</a></p>
+            <p class="pos-cuidado">A IA sugere; você adapta ao seu contexto e currículo.</p>
+            <button class="btn ghost copiar" data-alvo="pos2">Copiar prompt</button>
+          </div>
+          <div class="pos-card">
+            <span class="pos-foco">Personalização • testar</span>
+            <h4>Exercícios por nível de proficiência</h4>
+            <div class="pos-prompt" id="pos3">Sobre o tema "rotinas diárias", crie a mesma atividade de vocabulário em três níveis (A1, A2, B1), com instruções e exemplos adequados a cada nível.</div>
+            <p class="pos-tools">Ferramentas: <a class="btn ghost" style="padding:.2rem .6rem;font-size:.82rem" target="_blank" rel="noopener" href="https://duck.ai/">Duck.ai</a> <a class="btn ghost" style="padding:.2rem .6rem;font-size:.82rem" target="_blank" rel="noopener" href="https://chatai.org/pt">chatAI</a></p>
+            <p class="pos-cuidado">Verifique se os níveis estão realmente distintos e adequados.</p>
+            <button class="btn ghost copiar" data-alvo="pos3">Copiar prompt</button>
+          </div>
+          <div class="pos-card">
+            <span class="pos-foco">Feedback • testar</span>
+            <h4>Feedback com critérios</h4>
+            <div class="pos-prompt" id="pos4">Atue como professor de línguas. Avalie o texto a seguir com uma rubrica de 4 critérios (adequação à tarefa, coesão, vocabulário, gramática), em nível B1, e dê feedback respeitoso e acionável. Não reescreva o texto inteiro.
+Texto: [cole aqui]</div>
+            <p class="pos-tools">Ferramentas: <a class="btn ghost" style="padding:.2rem .6rem;font-size:.82rem" target="_blank" rel="noopener" href="https://duck.ai/">Duck.ai</a> <a class="btn ghost" style="padding:.2rem .6rem;font-size:.82rem" target="_blank" rel="noopener" href="https://chatai.org/pt">chatAI</a></p>
+            <p class="pos-cuidado">Feedback de IA pode errar; use como apoio, não como nota final.</p>
+            <button class="btn ghost copiar" data-alvo="pos4">Copiar prompt</button>
+          </div>
+          <div class="pos-card">
+            <span class="pos-foco">Prática de línguas • testar</span>
+            <h4>Simulação (role-play)</h4>
+            <div class="pos-prompt" id="pos5">Faça um role-play comigo em espanhol, nível A2, em uma situação de restaurante. Faça uma pergunta por vez, espere minha resposta e depois dê uma dica curta de correção.</div>
+            <p class="pos-tools">Ferramentas: <a class="btn ghost" style="padding:.2rem .6rem;font-size:.82rem" target="_blank" rel="noopener" href="https://duck.ai/">Duck.ai</a> <a class="btn ghost" style="padding:.2rem .6rem;font-size:.82rem" target="_blank" rel="noopener" href="https://chatai.org/pt">chatAI</a> <span class="ajuda">(use o chat com áudio, se disponível)</span></p>
+            <p class="pos-cuidado">Não digite dados pessoais; pratique com dados fictícios.</p>
+            <button class="btn ghost copiar" data-alvo="pos5">Copiar prompt</button>
+          </div>
+          <div class="pos-card">
+            <span class="pos-foco">Prática de línguas • testar</span>
+            <h4>Glossário contextual</h4>
+            <div class="pos-prompt" id="pos6">A partir do texto a seguir, liste 10 palavras/expressões úteis para nível B1, com significado no contexto, um exemplo de uso e uma tradução.
+Texto: [cole aqui]</div>
+            <p class="pos-tools">Ferramentas: <a class="btn ghost" style="padding:.2rem .6rem;font-size:.82rem" target="_blank" rel="noopener" href="https://duck.ai/">Duck.ai</a> <a class="btn ghost" style="padding:.2rem .6rem;font-size:.82rem" target="_blank" rel="noopener" href="https://chatai.org/pt">chatAI</a></p>
+            <p class="pos-cuidado">Confira traduções e exemplos em fonte independente.</p>
+            <button class="btn ghost copiar" data-alvo="pos6">Copiar prompt</button>
+          </div>
+          <div class="pos-card">
+            <span class="pos-foco">Acessibilidade • testar</span>
+            <h4>Simplificar, traduzir e ampliar</h4>
+            <div class="pos-prompt" id="pos7">Reescreva o texto a seguir em linguagem simples e inclua um resumo em tópicos. Depois, sugira como apresentá-lo para estudantes com deficiência visual (ex.: leitura em voz, descrição de imagens).
+Texto: [cole aqui]</div>
+            <p class="pos-tools">Ferramentas: <a class="btn ghost" style="padding:.2rem .6rem;font-size:.82rem" target="_blank" rel="noopener" href="https://duck.ai/">Duck.ai</a> <a class="btn ghost" style="padding:.2rem .6rem;font-size:.82rem" target="_blank" rel="noopener" href="https://chatai.org/pt">chatAI</a> <span class="ajuda">+ leitura em voz do sistema</span></p>
+            <p class="pos-cuidado">A acessibilidade exige validação com quem vive a deficiência; a IA é ponto de partida.</p>
+            <button class="btn ghost copiar" data-alvo="pos7">Copiar prompt</button>
+          </div>
+          <div class="pos-card">
+            <span class="pos-foco">Curadoria • testar</span>
+            <h4>Verificar o que a IA "afirma"</h4>
+            <div class="pos-prompt" id="pos8">Sobre a BNCC e o ensino de línguas, cite 3 documentos oficiais brasileiros (título, ano e órgão). Para cada um, eu vou verificar a existência em fonte oficial — avise se não tiver certeza.</div>
+            <p class="pos-tools">Verificação: <a class="btn ghost" style="padding:.2rem .6rem;font-size:.82rem" target="_blank" rel="noopener" href="https://www.gov.br/mec/pt-br/referencial-de-ia-na-educacao">MEC</a> <a class="btn ghost" style="padding:.2rem .6rem;font-size:.82rem" target="_blank" rel="noopener" href="https://www.scielo.br/">SciELO</a> <a class="btn ghost" style="padding:.2rem .6rem;font-size:.82rem" target="_blank" rel="noopener" href="https://scholar.google.com/">Google Acadêmico</a></p>
+            <p class="pos-cuidado">A IA pode "alucinar" referências. Sempre confirme na fonte oficial.</p>
+            <button class="btn ghost copiar" data-alvo="pos8">Copiar prompt</button>
+          </div>
+        </div>
+
+        <h3 style="margin-top:1.1rem">Registro da experimentação</h3>
+
+        <h3>A) Exploração do recurso (possibilidade testada)</h3>
+        <p class="ajuda">Registre o uso que você testou com os prompts acima.</p>
+        <label>Qual possibilidade você explorou?</label>
+        <select id="t4-exp-qual">
+          <option value="">— escolha —</option>
+          <option>Planejamento — adaptar texto por nível</option>
+          <option>Planejamento — plano de aula</option>
+          <option>Personalização — exercícios por nível</option>
+          <option>Feedback — feedback com critérios</option>
+          <option>Prática de línguas — role-play</option>
+          <option>Prática de línguas — glossário</option>
+          <option>Acessibilidade — simplificar/traduzir</option>
+          <option>Curadoria — verificar fontes</option>
+          <option>Outro</option>
+        </select>
+        <label>Ferramenta de IA usada</label>
+        <input type="text" id="t4-exp-ferr" placeholder="Ex.: Duck.ai, chatAI..." autocomplete="off" />
+        <label>Prompt usado na exploração</label>
+        <textarea id="t4-exp-prompt" style="min-height:60px"></textarea>
+        <label>O que funcionou / o que a IA errou</label>
+        <textarea id="t4-exp-result" style="min-height:60px"></textarea>
+
+        <p style="text-align:center;margin-top:1rem">
+          <button class="btn verde" id="t4-enviar">Enviar proposta</button>
+          <button class="btn ghost" id="t4-rascunho">Salvar rascunho</button>
+          <span class="ajuda" id="t4-msg" style="display:block;margin-top:.4rem"></span>
+        </p>
+        <p style="text-align:center;margin-top:1.1rem"><button class="btn ghost ofi-voltar">⬅ Voltar à página principal da oficina</button></p>
+      </section>
+    </div>
+  </div>
+</main>
+
+<footer class="rodape">
+  <p>Oficina — Desafios e potencialidades da IA no ensino e aprendizagem de línguas.</p>
+  <p>© 2026 Camila Gervaz. <a href="termos.html">Termos de uso e como citar</a>.</p>
+</footer>
+
+<script src="assets/config.js?v92"></script>
+<script src="assets/data.js?v92"></script>
+<script src="assets/app.js?v92"></script>
+<script src="assets/tipos-ia.js?v92"></script>
+<script src="assets/limitacoes.js?v92"></script>
+<script>
+(function () {
+  "use strict";
+  function h(s) { var x = 2166136261; for (var i = 0; i < s.length; i++) { x ^= s.charCodeAt(i); x = Math.imul(x, 16777619); } return x >>> 0; }
+  var CODIGO = 4189888726; /* FLM6114 */
+  var GRUPO = Number(lerLocal("oficina_grupo") || 0);
+  var NOMEG = lerLocal("oficina_grupo_nome") || "";
+  var nomesCaso = { itapecerica: "Itapecerica da Serra (SP, 2026)", elefante: "Elefante Letrado (SP, 2026)", cariacica: "Cariacica (ES, 2025)" };
+
+  /* ---------- abas ---------- */
+  function mostrarTab(n) {
+    document.getElementById("home").hidden = true;
+    [1, 2, 3, 4].forEach(function (k) {
+      var el = document.getElementById("tab" + k); if (el) el.hidden = (k !== n);
+      var b = document.querySelector('.ofi-aba[data-tab="' + k + '"]'); if (b) b.classList.toggle("ativa", k === n);
+    });
+    try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch (e) {}
+  }
+  function irHome() {
+    document.getElementById("home").hidden = false;
+    [1, 2, 3, 4].forEach(function (k) {
+      var el = document.getElementById("tab" + k); if (el) el.hidden = true;
+      var b = document.querySelector('.ofi-aba[data-tab="' + k + '"]'); if (b) b.classList.remove("ativa");
+    });
+    try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch (e) {}
+  }
+  document.querySelectorAll(".ofi-aba").forEach(function (b) {
+    b.addEventListener("click", function () { mostrarTab(Number(b.dataset.tab)); });
+  });
+  document.querySelectorAll(".ofi-home-btn").forEach(function (b) {
+    b.addEventListener("click", function () { mostrarTab(Number(b.dataset.tab)); });
+  });
+  document.querySelectorAll(".ofi-voltar").forEach(function (b) {
+    b.addEventListener("click", irHome);
+  });
+  document.querySelectorAll(".copiar").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var el = document.getElementById(b.dataset.alvo);
+      var txt = el ? el.textContent : "";
+      if (navigator.clipboard) navigator.clipboard.writeText(txt).then(function () { var o = b.textContent; b.textContent = "Copiado!"; setTimeout(function () { b.textContent = o; }, 1500); });
+      else { var t = document.createElement("textarea"); t.value = txt; document.body.appendChild(t); t.select(); try { document.execCommand("copy"); } catch (e) {} t.remove(); }
+    });
+  });
+
+  /* ---------- grupo ---------- */
+  function pintarGrupo() {
+    document.getElementById("grupoAtual").textContent = "Grupo " + GRUPO + (NOMEG ? " · " + NOMEG : "");
+  }
+  function mostrarOficina() {
+    document.getElementById("grupoBox").hidden = true;
+    pintarGrupo(); iniciarEtapa1(); prepararEtapa2(); carregarRascunhos();
+  }
+  function semGrupo() {
+    document.getElementById("grupoBox").hidden = false;
+    var en = document.getElementById("t1-enunciado"); if (en) en.textContent = "Escolha o seu grupo acima para começar.";
+    var op = document.getElementById("t1-opcoes"); if (op) op.innerHTML = "";
+    var nt = document.getElementById("t2-noticia"); if (nt) nt.innerHTML = "<p class='ajuda'>Escolha o seu grupo acima para ver a sua notícia.</p>";
+  }
+  document.querySelectorAll(".ofi-gbtn").forEach(function (b) {
+    b.addEventListener("click", function () {
+      document.querySelectorAll(".ofi-gbtn").forEach(function (x) { x.classList.remove("sel"); });
+      b.classList.add("sel"); GRUPO = Number(b.dataset.g);
+    });
+  });
+  document.getElementById("btnGrupo").onclick = function () {
+    if (!GRUPO) { alert("Escolha o grupo."); return; }
+    NOMEG = (document.getElementById("nomeGrupo").value || "").trim();
+    salvarLocal("oficina_grupo", GRUPO); salvarLocal("oficina_grupo_nome", NOMEG);
+    mostrarOficina();
+  };
+  document.getElementById("btnTrocarGrupo").onclick = function () {
+    document.getElementById("oficina").hidden = true; document.getElementById("grupoBox").hidden = false;
+  };
+
+  /* ---------- ETAPA I — jogo ---------- */
+  var t1 = { itens: [], idx: 0, pontos: 0, streak: 0, ok: false };
+  function iniciarEtapa1() {
+    if (!GRUPO) return;
+    t1.itens = TIPOS_IA.conjunto("tipos-ia-2026", GRUPO);
+    t1.idx = 0; t1.pontos = 0; t1.streak = 0; t1.ok = false;
+    t1render();
+  }
+  function t1render() {
+    var ex = t1.itens[t1.idx]; t1.ok = false;
+    document.getElementById("t1-contador").textContent = "Exemplo " + (t1.idx + 1) + " de " + t1.itens.length;
+    document.getElementById("t1-barra").style.width = (t1.idx / t1.itens.length * 100) + "%";
+    document.getElementById("t1-placar").textContent = t1.pontos + " ponto(s) · 🔥 " + t1.streak;
+    document.getElementById("t1-enunciado").textContent = ex.texto;
+    var fb = document.getElementById("t1-fb"); fb.className = "tia-fb"; fb.innerHTML = "";
+    var prox = document.getElementById("t1-prox"); prox.hidden = true;
+    prox.textContent = (t1.idx === t1.itens.length - 1) ? "Concluir" : "Próximo →";
+    var ops = document.getElementById("t1-opcoes");
+    ops.innerHTML = TIPOS_IA.TIPOS_IDS.map(function (t) {
+      var m = TIPOS_IA.TIPOS[t]; return '<button class="tia-op" data-t="' + t + '"><span class="em">' + m.emoji + "</span>" + m.nome + "</button>";
+    }).join("");
+    ops.querySelectorAll(".tia-op").forEach(function (b) { b.addEventListener("click", function () { t1resp(b.dataset.t, b, ops); }); });
+  }
+  function t1resp(t, btn, ops) {
+    if (t1.ok) return; t1.ok = true;
+    var ex = t1.itens[t1.idx], certo = (t === ex.tipo);
+    ops.querySelectorAll(".tia-op").forEach(function (b) { b.disabled = true; if (b.dataset.t === ex.tipo) b.classList.add("certo"); });
+    if (!certo) btn.classList.add("errado");
+    if (certo) { t1.pontos += 10; t1.streak += 1; } else { t1.streak = 0; }
+    document.getElementById("t1-placar").textContent = t1.pontos + " ponto(s) · 🔥 " + t1.streak;
+    var m = TIPOS_IA.TIPOS[ex.tipo], fb = document.getElementById("t1-fb");
+    fb.className = "tia-fb " + (certo ? "ok" : "no");
+    fb.innerHTML = "<strong>" + (certo ? "✅ Isso! " : "❌ Quase. ") + "Tipo correto: " + m.emoji + " " + m.nome + ".</strong><br>" + ex.explicacao;
+    document.getElementById("t1-prox").hidden = false;
+  }
+  document.getElementById("t1-prox").onclick = function () {
+    if (t1.idx < t1.itens.length - 1) { t1.idx++; t1render(); }
+    else { document.getElementById("t1-barra").style.width = "100%"; alert("Fim! " + (t1.pontos / 10) + "/" + t1.itens.length + " acertos."); }
+  };
+
+  /* ---------- ETAPA II — notícia do grupo ---------- */
+  function prepararEtapa2() {
+    if (!GRUPO) { document.getElementById("t2-noticia").innerHTML = "<p class='ajuda'>Escolha o seu grupo acima para ver a sua notícia.</p>"; return; }
+    var casos = LIA.CASOS.filter(function (c) { return c.num <= 3; });
+    var ordem = OficinaUtil.seededShuffle(casos, "oficina-2026|casos");
+    var c = ordem[(GRUPO - 1) % ordem.length];
+    var links = c.links.map(function (l) { return '<a class="btn ghost" style="padding:.15rem .5rem;font-size:.8rem" target="_blank" rel="noopener" href="' + l[1] + '">' + l[0] + "</a>"; }).join(" ");
+    document.getElementById("t2-noticia").innerHTML =
+      '<div class="ofi-not"><span class="ofi-foco">Caso do Grupo ' + GRUPO + " · " + c.foco + "</span>" +
+      "<h3>" + c.titulo + "</h3><p>" + c.resumo + "</p>" +
+      (links ? "<p>" + links + "</p>" : "") +
+      (c.fonte ? '<p class="ofi-fonte">Fonte: ' + c.fonte + "</p>" : "") + "</div>";
+  }
+  document.getElementById("t2-rascunho").onclick = function () { salvarLocal("ofi_t2", t2coletar()); document.getElementById("t2-msg").textContent = "Rascunho salvo."; };
+  document.getElementById("t2-enviar").onclick = function () {
+    var d = t2coletar();
+    var c = casoDoGrupo();
+    var resumo = "ETAPA II — Desafios e limitações\nGrupo " + GRUPO + (NOMEG ? " (" + NOMEG + ")" : "") + "\nNotícia: " + (c ? c.titulo : "") +
+      "\n\nO que revela: " + (d.revela || "-") + "\nLimites/desafios: " + (d.limites || "-") + "\nQuem foi afetado: " + (d.afetados || "-") + "\nSalvaguarda: " + (d.salva || "-");
+    enviar("oficina-etapa2", resumo, c ? c.titulo : "", this, "t2-msg");
+  };
+  function casoDoGrupo() { var casos = LIA.CASOS.filter(function (c) { return c.num <= 3; }); var ordem = OficinaUtil.seededShuffle(casos, "oficina-2026|casos"); return ordem[(GRUPO - 1) % ordem.length]; }
+  function t2coletar() { return { revela: val("t2-revela"), limites: val("t2-limites"), afetados: val("t2-afetados"), salva: val("t2-salva") }; }
+
+  /* ---------- ETAPA III ---------- */
+  document.getElementById("t3-file").onchange = function () {
+    var f = this.files && this.files[0]; if (!f) return;
+    var fr = new FileReader(); fr.onload = function () { document.getElementById("t3-preview").innerHTML = '<img src="' + fr.result + '" style="max-width:100%;border-radius:10px;border:1px solid #cbd5e1" alt="representação do grupo">'; }; fr.readAsDataURL(f);
+  };
+  document.getElementById("t3-rascunho").onclick = function () { salvarLocal("ofi_t3", t3coletar()); document.getElementById("t3-msg").textContent = "Rascunho salvo."; };
+  document.getElementById("t3-enviar").onclick = function () {
+    var d = t3coletar();
+    var resumo = "ETAPA III — Diálogo construtivo\nGrupo " + GRUPO + (NOMEG ? " (" + NOMEG + ")" : "") +
+      "\n\nINDIVIDUAL (familiar): " + (d.indFamiliar || "-") + "\nINDIVIDUAL (novo): " + (d.indNovo || "-") + "\nINDIVIDUAL (dúvida): " + (d.indDuvida || "-") +
+      "\n\nGRUPO — familiar: " + (d.gFamiliar || "-") + "\nGRUPO — novo: " + (d.gNovo || "-") + "\nGRUPO — dúvida: " + (d.gDuvida || "-") +
+      "\n\nRepresentação (" + (d.formato || "sem formato") + "): " + (d.desc || "-");
+    enviar("oficina-etapa3", resumo, "Diálogo construtivo", this, "t3-msg");
+  };
+  function t3coletar() {
+    return { indFamiliar: val("t3-rev-ind-familiar"), indNovo: val("t3-rev-ind-novo"), indDuvida: val("t3-rev-ind-duvida"), gFamiliar: val("t3-g-familiar"), gNovo: val("t3-g-novo"), gDuvida: val("t3-g-duvida"), formato: document.getElementById("t3-formato").value, desc: val("t3-desc") };
+  }
+
+  /* ---------- ETAPA IV ---------- */
+  document.getElementById("t4-rascunho").onclick = function () { salvarLocal("ofi_t4", t4coletar()); document.getElementById("t4-msg").textContent = "Rascunho salvo."; };
+  document.getElementById("t4-enviar").onclick = function () {
+    var d = t4coletar();
+    var resumo = "ETAPA IV — ExperimentAção\nGrupo " + GRUPO + (NOMEG ? " (" + NOMEG + ")" : "") +
+      "\n\nEXPLORAÇÃO — possibilidade: " + (d.expQual || "-") + "\nEXPLORAÇÃO — ferramenta: " + (d.expFerr || "-") +
+      "\nEXPLORAÇÃO — prompt: " + (d.expPrompt || "-") + "\nEXPLORAÇÃO — resultado: " + (d.expResult || "-");
+    enviar("oficina-etapa4", resumo, "ExperimentAção", this, "t4-msg");
+  };
+  function t4coletar() {
+    return { expQual: val("t4-exp-qual"), expFerr: val("t4-exp-ferr"), expPrompt: val("t4-exp-prompt"), expResult: val("t4-exp-result") };
+  }
+
+  /* ---------- util ---------- */
+  function val(id) { var e = document.getElementById(id); return e ? (e.value || "").trim() : ""; }
+  function enviar(tipo, resumo, extra, botao, msgId) {
+    var payload = { tipo: tipo, nome: "Grupo " + GRUPO + (NOMEG ? " (" + NOMEG + ")" : ""), resumo: resumo, grupo: GRUPO, ts: new Date().toISOString() };
+    var codigo = OficinaUtil.enviarResultado(payload, botao);
+    var m = document.getElementById(msgId); if (m) m.textContent = "Enviado! Código: " + codigo.slice(0, 24) + "...";
+  }
+  function carregarRascunhos() {
+    var a = lerLocal("ofi_t2"); if (a) { set("t2-revela", a.revela); set("t2-limites", a.limites); set("t2-afetados", a.afetados); set("t2-salva", a.salva); }
+    var b = lerLocal("ofi_t3"); if (b) { set("t3-rev-ind-familiar", b.indFamiliar); set("t3-rev-ind-novo", b.indNovo); set("t3-rev-ind-duvida", b.indDuvida); set("t3-g-familiar", b.gFamiliar); set("t3-g-novo", b.gNovo); set("t3-g-duvida", b.gDuvida); set("t3-desc", b.desc); if (b.formato) document.getElementById("t3-formato").value = b.formato; }
+    var c = lerLocal("ofi_t4"); if (c) { set("t4-exp-qual", c.expQual); set("t4-exp-ferr", c.expFerr); set("t4-exp-prompt", c.expPrompt); set("t4-exp-result", c.expResult); }
+  }
+  function set(id, v) { var e = document.getElementById(id); if (e) e.value = v || ""; }
+
+  /* ---------- gate ---------- */
+  function abrir() {
+    document.getElementById("trava").hidden = true; document.getElementById("app").hidden = false;
+    if (GRUPO) { pintarGrupo(); var sb = document.querySelector('.ofi-gbtn[data-g="' + GRUPO + '"]'); if (sb) sb.classList.add("sel"); document.getElementById("nomeGrupo").value = NOMEG; mostrarOficina(); }
+    else { semGrupo(); }
+    irHome();
+  }
+  function bloquear() { document.getElementById("trava").hidden = false; document.getElementById("app").hidden = true; }
+  var desbloqueado = false; try { desbloqueado = localStorage.getItem("oficina_unlock") === "1"; } catch (e) {}
+  try { var k = new URLSearchParams(location.search).get("k") || ""; if (h(k) === CODIGO) { desbloqueado = true; localStorage.setItem("oficina_unlock", "1"); } } catch (e) {}
+  if (desbloqueado) abrir(); else bloquear();
+  document.getElementById("btnAcesso").onclick = function () {
+    var c = (document.getElementById("codigoAcesso").value || "").trim();
+    if (h(c) === CODIGO) { try { localStorage.setItem("oficina_unlock", "1"); } catch (e) {} abrir(); } else document.getElementById("msgAcesso").textContent = "Código incorreto.";
+  };
+  document.getElementById("codigoAcesso").addEventListener("keydown", function (e) { if (e.key === "Enter") document.getElementById("btnAcesso").click(); });
+})();
+</script>
+</body>
+</html>

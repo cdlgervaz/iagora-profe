@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>IAgora, profe?! — Tipos de IA (flashcards da professora)</title>
+<link rel="stylesheet" href="assets/style.css?v92" />
+<style>
+  #trilhaWidget { display: none !important; }
+  .tia-barra { display: flex; flex-wrap: wrap; gap: .6rem 1rem; align-items: center; margin: .5rem 0; }
+  .tia-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: .8rem; }
+  .tia-flash { border: 2px solid #cbd5e1; border-radius: 14px; padding: 1rem; background: #fff; cursor: pointer; min-height: 150px; display: flex; flex-direction: column; justify-content: center; transition: border-color .15s, background .15s; }
+  .tia-flash:hover { border-color: #6366f1; }
+  .tia-flash .rot { font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: #94a3b8; font-weight: 800; }
+  .tia-flash .txt { font-size: 1.05rem; margin: .3rem 0 0; }
+  .tia-flash .resp { display: none; }
+  .tia-flash.virado { background: #f8fafc; border-color: #4f46e5; }
+  .tia-flash.virado .resp { display: block; margin-top: .5rem; }
+  .tia-flash.virado .oculto { display: none; }
+  .tia-tipo { display: inline-block; border-radius: 999px; padding: .2rem .7rem; font-weight: 800; color: #fff; font-size: .82rem; }
+  .tia-explica { font-size: .92rem; color: #334155; margin-top: .35rem; }
+  .proj .tia-flash .txt { font-size: 1.5rem; }
+  .proj .tia-flash .resp { font-size: 1.3rem; }
+  .proj .tia-explica { font-size: 1.15rem; }
+  .nao-print { }
+  #apresCard { min-height: 260px; justify-content: center; text-align: center; }
+  #apresCard .txt { font-size: clamp(1.4rem, 3.2vw, 2.4rem); }
+  #apresCard .resp { font-size: 1.25rem; }
+  #apresCard .tia-explica { font-size: 1.15rem; }
+  .apres-acoes { text-align: center; margin-top: .7rem; display: flex; gap: .5rem; justify-content: center; flex-wrap: wrap; }
+  @media print { .nao-print { display: none !important; } .tia-flash { break-inside: avoid; } .tia-flash .resp { display: block !important; } .tia-flash .oculto { display: none !important; } }
+</style>
+</head>
+<body>
+<header class="topo">
+  <div class="wrap">
+    <p class="marca">IAgora, profe?!</p>
+    <h1>Tipos de IA — flashcards (professora)</h1>
+    <p>Mostre o exemplo, clique no cartão para revelar a resposta e a explicação.</p>
+  </div>
+</header>
+
+<main>
+  <section class="card" id="trava">
+    <h2>Acesso restrito</h2>
+    <p>Digite o <strong>código da professora</strong>.</p>
+    <input type="text" id="codigoAcesso" placeholder="código de acesso" autocomplete="off" />
+    <p style="margin-top:.8rem">
+      <button class="btn" id="btnAcesso">Entrar</button>
+      <span class="ajuda" id="msgAcesso" style="margin-left:.6rem"></span>
+    </p>
+  </section>
+
+  <div id="app" hidden>
+    <section class="card nao-print">
+      <h2>Controles</h2>
+      <div class="tia-barra">
+        <label>Semente do sorteio: <input type="text" id="seed" style="width:auto;display:inline-block" /></label>
+        <button class="btn" id="btnReorg">Reorganizar</button>
+        <button class="btn ghost" id="btnTodas">Mostrar todas as respostas</button>
+        <button class="btn ghost" id="btnOcultar">Ocultar todas</button>
+        <label><input type="checkbox" id="apresChk"> <strong>Apresentação (um a um)</strong></label>
+        <label><input type="checkbox" id="proj"> <strong>Modo projetor</strong></label>
+        <button class="btn ghost" id="btnPrint">Imprimir / PDF</button>
+      </div>
+      <p class="ajuda">Troque a semente para reorganizar (avise a turma se usar <code>?seed=</code>).</p>
+    </section>
+
+    <div id="saida"></div>
+
+    <section class="card" id="apresSec" hidden>
+      <div class="tia-flash" id="apresCard"></div>
+      <div class="apres-acoes">
+        <button class="btn" id="apresMostrar">Mostrar resposta</button>
+        <button class="btn ghost" id="apresAnt">← Anterior</button>
+        <button class="btn ghost" id="apresProx">Próximo →</button>
+      </div>
+      <p class="ajuda" style="text-align:center" id="apresCont"></p>
+    </section>
+  </div>
+</main>
+
+<footer class="rodape">
+  <p>© 2026 Camila Gervaz. <strong>Versão em fase de testes.</strong> <a href="termos.html">Termos de uso e como citar</a>.</p>
+</footer>
+
+<script src="assets/config.js?v92"></script>
+<script src="assets/data.js?v92"></script>
+<script src="assets/app.js?v92"></script>
+<script src="assets/tipos-ia.js?v92"></script>
+<script>
+(function () {
+  "use strict";
+  function h(s) { var x = 2166136261; for (var i = 0; i < s.length; i++) { x ^= s.charCodeAt(i); x = Math.imul(x, 16777619); } return x >>> 0; }
+  var CODIGO_ESPERADO = 4189888726; /* FLM6114 */
+
+  var saida = document.getElementById("saida");
+  var seedEl = document.getElementById("seed");
+  seedEl.value = "tipos-ia-2026";
+  var cartoes = [];
+  var ap = { ativo: false, i: 0, virado: false };
+
+  function montarCartoes() {
+    var seed = seedEl.value.trim() || "tipos-ia-2026";
+    var mapa = TIPOS_IA.atribuir(seed);
+    cartoes = [];
+    [1, 2, 3].forEach(function (g) { mapa[g].forEach(function (ex, i) { cartoes.push({ g: g, n: i + 1, ex: ex }); }); });
+  }
+  function cardInner(c) {
+    var m = TIPOS_IA.TIPOS[c.ex.tipo];
+    return '<span class="rot">Grupo ' + c.g + " · cartão " + c.n + "</span>" +
+      '<p class="txt">' + c.ex.texto + "</p>" +
+      '<p class="oculto" style="color:#94a3b8;font-size:.85rem">(clique para revelar)</p>' +
+      '<div class="resp"><span class="tia-tipo" style="background:' + m.cor + '">' + m.emoji + " " + m.nome + "</span>" +
+      '<p class="tia-explica">' + c.ex.explicacao + "</p></div>";
+  }
+
+  function render() {
+    montarCartoes();
+    var html = '<section class="card"><h2>Todos os exemplos — cartões (o grupo está indicado em cada cartão)</h2><div class="tia-grid">';
+    cartoes.forEach(function (c, idx) { html += '<div class="tia-flash" data-i="' + idx + '">' + cardInner(c) + "</div>"; });
+    html += "</div></section>";
+    saida.innerHTML = html;
+    saida.querySelectorAll(".tia-flash").forEach(function (el) { el.addEventListener("click", function () { el.classList.toggle("virado"); }); });
+  }
+
+  function renderApres() {
+    var card = document.getElementById("apresCard");
+    var c = cartoes[ap.i]; if (!card || !c) return;
+    card.className = "tia-flash" + (ap.virado ? " virado" : "");
+    card.innerHTML = cardInner(c);
+    document.getElementById("apresCont").textContent = "Cartão " + (ap.i + 1) + " de " + cartoes.length + " · Grupo " + c.g;
+  }
+  function apSet(i, virado) { if (!cartoes.length) montarCartoes(); ap.i = ((i % cartoes.length) + cartoes.length) % cartoes.length; ap.virado = !!virado; renderApres(); }
+
+  document.getElementById("btnReorg").onclick = function () { montarCartoes(); render(); if (ap.ativo) apSet(0, false); };
+  document.getElementById("btnTodas").onclick = function () { saida.querySelectorAll(".tia-flash").forEach(function (c) { c.classList.add("virado"); }); };
+  document.getElementById("btnOcultar").onclick = function () { saida.querySelectorAll(".tia-flash").forEach(function (c) { c.classList.remove("virado"); }); };
+  document.getElementById("proj").onchange = function () { document.body.classList.toggle("proj", this.checked); };
+  document.getElementById("btnPrint").onclick = function () { window.print(); };
+
+  document.getElementById("apresChk").onchange = function () {
+    ap.ativo = this.checked;
+    document.getElementById("saida").hidden = ap.ativo;
+    document.getElementById("apresSec").hidden = !ap.ativo;
+    if (ap.ativo) { montarCartoes(); apSet(0, false); }
+  };
+  document.getElementById("apresCard").addEventListener("click", function () { ap.virado = !ap.virado; renderApres(); });
+  document.getElementById("apresMostrar").onclick = function () { ap.virado = !ap.virado; renderApres(); };
+  document.getElementById("apresAnt").onclick = function () { apSet(ap.i - 1, false); };
+  document.getElementById("apresProx").onclick = function () { apSet(ap.i + 1, false); };
+  document.addEventListener("keydown", function (e) {
+    if (!ap.ativo) return;
+    if (e.key === " " || e.key === "Enter") { e.preventDefault(); ap.virado = !ap.virado; renderApres(); }
+    else if (e.key === "ArrowRight") { e.preventDefault(); apSet(ap.i + 1, false); }
+    else if (e.key === "ArrowLeft") { e.preventDefault(); apSet(ap.i - 1, false); }
+  });
+
+  /* --- trava --- */
+  function abrir() { document.getElementById("trava").hidden = true; document.getElementById("app").hidden = false; render(); }
+  function bloquear() { document.getElementById("trava").hidden = false; document.getElementById("app").hidden = true; }
+  var desbloqueado = false;
+  try { desbloqueado = localStorage.getItem("tipos_flash_unlock") === "1"; } catch (e) {}
+  try { var k = new URLSearchParams(location.search).get("k") || ""; if (h(k) === CODIGO_ESPERADO) { desbloqueado = true; localStorage.setItem("tipos_flash_unlock", "1"); } } catch (e) {}
+  try { var s = new URLSearchParams(location.search).get("seed"); if (s) seedEl.value = s; } catch (e) {}
+  if (desbloqueado) abrir(); else bloquear();
+
+  document.getElementById("btnAcesso").onclick = function () {
+    var c = (document.getElementById("codigoAcesso").value || "").trim();
+    if (h(c) === CODIGO_ESPERADO) { try { localStorage.setItem("tipos_flash_unlock", "1"); } catch (e) {} abrir(); }
+    else document.getElementById("msgAcesso").textContent = "Código incorreto.";
+  };
+  document.getElementById("codigoAcesso").addEventListener("keydown", function (e) { if (e.key === "Enter") document.getElementById("btnAcesso").click(); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>IAgora, profe?! — Minha missão</title>
+<link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+<header class="topo">
+  <div class="wrap">
+    <p class="marca">IAgora, profe?!</p>
+    <h1>Minha missão</h1>
+    <p>Use o <strong>código de acesso</strong> que a professora enviou para ver o seu codinome e a sua missão.</p>
+    <nav id="nav"></nav>
+  </div>
+</header>
+
+<main>
+  <div class="aviso">
+    <strong>Versão em fase de testes.</strong> Material para avaliação e uso acadêmico; <strong>não</strong>
+    pode ser usado comercialmente. <a href="termos.html">Termos de uso e como citar</a>.
+  </div>
+
+  <section class="card" id="cardCodigo">
+    <h2>Entrar com código de acesso</h2>
+    <div class="callout"><strong>Como conseguir seu código?</strong> É de um destes dois jeitos:
+      <ol style="margin:.4rem 0 .2rem 1.1rem">
+        <li><strong>No resultado do autodiagnóstico</strong>, na seção
+          <em>“Sua missão (gerada pelo seu resultado)”</em>, aparece o seu
+          <strong>código de acesso</strong>. <a class="btn ghost" href="autodiagnostico.html" style="padding:.2rem .6rem">Ir ao autodiagnóstico</a></li>
+        <li>Ou use o <strong>código que a professora enviou</strong> em mensagem privada.</li>
+      </ol>
+      <p style="margin:.35rem 0 0"><strong>Copie o código</strong> e cole no campo abaixo para liberar a sua missão.</p>
+    </div>
+    <label for="nomeAcesso">Seu nome (para registrar o uso do código)</label>
+    <input type="text" id="nomeAcesso" placeholder="Seu nome" autocomplete="off" />
+    <label for="codigoAcesso">Código de acesso</label>
+    <input type="text" id="codigoAcesso" placeholder="Ex.: OF7K3Q9Z" autocapitalize="characters" autocomplete="off"
+      style="font-family:monospace;font-size:1.2rem;letter-spacing:.08em;text-align:center;text-transform:uppercase" />
+    <p><button class="btn verde" id="btnCodigo">Ver minha missão</button></p>
+  </section>
+
+  <section id="resultado"></section>
+</main>
+
+<footer class="rodape">
+  <p><strong>Fontes:</strong> Matriz de Saberes Digitais Docentes (MEC) e Marco de competências em IA para professores (UNESCO).</p>
+  <p>© 2026 Camila Gervaz. Todos os direitos reservados. <strong>Versão em fase de testes</strong> — sem uso comercial e sem alterações sem autorização. <a href="termos.html">Termos de uso e como citar</a>.</p>
+</footer>
+
+<script src="assets/config.js"></script>
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+renderNav("Minha missão");
+
+function mostrarPapel(papel, nome) {
+  const alvo = document.getElementById("resultado");
+  const bio = nome ? (((OFICINA.personalidades || []).find(p => p.nome === nome)) || {}).bio || "" : "";
+  alvo.innerHTML = `
+    ${nome ? `<div class="codinome-hero"><span class="emblema-tip" tabindex="0" data-tip="${(nome + (bio ? " — " + bio : "")).replace(/"/g, "&quot;")}">${emblemaSVG(nome, 96)}</span>
+      <div><p class="rotulo">Seu codinome</p><h2 class="codinome-nome">${nome}</h2>
+      ${bio ? `<p class="codinome-bio">${bio}</p>` : ""}</div></div>` : `<h2 style="margin:1rem 0 .4rem">Sua missão</h2>`}
+    <div style="margin-bottom:.6rem" class="sem-print"><button class="btn ghost" onclick="window.print()">Imprimir minha missão</button></div>
+    <div id="cartaoPapel"></div>
+    <section class="card" style="margin-top:1rem">
+      <h3>Checklist antes do encontro</h3>
+      <label><input type="checkbox" id="ck1" /> Li o documento do meu papel</label>
+      <label><input type="checkbox" id="ck2" /> Fiz a experiência com a IA indicada</label>
+      <label><input type="checkbox" id="ck3" /> Produzi o item “Produto para trazer”</label>
+      <label><input type="checkbox" id="ck4" /> Anotei a pergunta crítica e minha resposta</label>
+      <label><input type="checkbox" id="ck5" /> Vou trazer também o bilhete de saída</label>
+    </section>
+    <section class="card sem-print">
+      <h3>Envio para a professora</h3>
+      <label for="produto">Resumo do meu produto (opcional)</label>
+      <textarea id="produto" placeholder="Em 2-3 linhas: o que você descobriu/produziu e o que quer discutir"></textarea>
+      <p><button class="btn verde" id="btnEnviarMissao">Enviar por e-mail para a professora</button></p>
+    </section>
+    ${(window.OFICINA_CONFIG || {}).mostrarJigsaw === false ? "" : `
+    <p style="text-align:center;margin-top:1rem">
+      <a class="btn verde" href="jigsaw.html">Jigsaw — Atividade para o nosso encontro</a>
+    </p>`}`;
+  renderPapel(papel, "cartaoPapel");
+  ["ck1", "ck2", "ck3", "ck4", "ck5"].forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (lerLocal("ck_" + i)) el.checked = true;
+    el.addEventListener("change", () => salvarLocal("ck_" + i, el.checked));
+  });
+  document.getElementById("btnEnviarMissao").onclick = e => enviarResultado({
+    tipo: "missao", nome: nome || "(sem nome)", papelId: papel.id, titulo: papel.titulo,
+    produto: (document.getElementById("produto").value || "").trim(), ts: new Date().toISOString()
+  }, e.target);
+  concluirEtapa("missao");
+  alvo.scrollIntoView({ behavior: "smooth" });
+}
+
+document.getElementById("btnCodigo").onclick = () => {
+  const codigo = document.getElementById("codigoAcesso").value;
+  const nome = (document.getElementById("nomeAcesso") || {}).value || "";
+  if (!codigo.trim()) { alert("Digite o código de acesso."); return; }
+  claimCodinome(codigo, nome, res => {
+    if (!res || !res.ok) { alert((res && res.motivo) || "Código inválido. Confira com a professora."); return; }
+    mostrarPapel(papelPorId(res.papelId), res.codinome);
+  });
+};
+
+gateEtapa("missao");
+</script>
+</body>
+</html>

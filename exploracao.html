@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>IAgora, profe?! — Exploração mediada</title>
+<link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+<header class="topo">
+  <div class="wrap">
+    <p class="marca">IAgora, profe?!</p>
+    <h1>Exploração Mediada de IA</h1>
+    <p>Sua <strong>tarefa prévia</strong> personalizada pelo seu nível e pelos seus interesses —
+    um roteiro em 3 momentos: <strong>Antes</strong> · <strong>Durante</strong> · <strong>Depois</strong>.</p>
+    <nav id="nav"></nav>
+  </div>
+</header>
+
+<main>
+  <div class="aviso">
+    <strong>Versão em fase de testes.</strong> Material para avaliação e uso acadêmico; <strong>não</strong>
+    pode ser usado comercialmente. <a href="termos.html">Termos de uso e como citar</a>.
+  </div>
+
+  <section class="card sem-print">
+    <label for="nomeExp">Seu nome (ou seu codinome)</label>
+    <input type="text" id="nomeExp" placeholder="Como você quer ser identificada na entrega?" />
+
+    <h2>1. Seu nível</h2>
+    <p class="ajuda" id="dicaNivel">Se você já fez o autodiagnóstico, seu nível sugerido aparece marcado.</p>
+    <div class="niveis" id="niveis"></div>
+
+    <h2>2. Seus interesses <span class="pill">escolha de 1 a 3</span></h2>
+    <div class="chips" id="interesses"></div>
+
+    <p style="margin-top:1.2rem">
+      <button class="btn verde" id="btnGerar">Gerar minha exploração</button>
+      <button class="btn ghost" onclick="window.print()">Imprimir</button>
+    </p>
+  </section>
+
+  <section id="saida"></section>
+</main>
+
+<footer class="rodape">
+  <p><strong>Fontes:</strong> Matriz de Saberes Digitais Docentes (MEC) e Marco de competências em IA para professores (UNESCO).</p>
+  <p>© 2026 Camila Gervaz. Todos os direitos reservados. <strong>Versão em fase de testes</strong> — sem uso comercial e sem alterações sem autorização. <a href="termos.html">Termos de uso e como citar</a>.</p>
+</footer>
+
+<script src="assets/config.js"></script>
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+renderNav("Exploração mediada");
+
+const NIVEL_INFO = {
+  adquirir: { rotulo: "Adquirir", selo: "Base", sub: "construir a base" },
+  aprofundar: { rotulo: "Aprofundar", selo: "Critério", sub: "aplicar com critério" },
+  criar: { rotulo: "Criar", selo: "Autoria", sub: "produzir e propor" }
+};
+
+let nivelAtual = "aprofundar";
+(function () {
+  const reg = lerLocal("autodiagnostico");
+  if (reg && reg.perfil) {
+    const m = { "Iniciante": "adquirir", "Familiarização": "adquirir", "Adaptação": "aprofundar",
+                "Integração": "aprofundar", "Liderança": "criar" };
+    if (m[reg.perfil]) nivelAtual = m[reg.perfil];
+    document.getElementById("dicaNivel").textContent =
+      "Sugerido pelo seu autodiagnóstico: " + reg.perfil + " (" + reg.geral + "%). Você pode ajustar.";
+  }
+})();
+
+const niveisEl = document.getElementById("niveis");
+Object.keys(NIVEL_INFO).forEach(k => {
+  const info = NIVEL_INFO[k], exp = OFICINA.exploracoesNivel[k];
+  const lbl = document.createElement("label");
+  lbl.className = "nivel-op" + (k === nivelAtual ? " sel" : "");
+  lbl.innerHTML = `<input type="radio" name="nivel" value="${k}" ${k === nivelAtual ? "checked" : ""} />
+    <span class="selo">${info.selo}</span>
+    <b>${info.rotulo}</b>
+    <small>${exp.titulo} — ${info.sub}</small>`;
+  lbl.querySelector("input").addEventListener("change", () => {
+    nivelAtual = k;
+    niveisEl.querySelectorAll(".nivel-op").forEach(o => o.classList.remove("sel"));
+    lbl.classList.add("sel");
+  });
+  niveisEl.appendChild(lbl);
+});
+
+const chipsEl = document.getElementById("interesses");
+OFICINA.interesses.forEach(i => {
+  const lbl = document.createElement("label");
+  lbl.className = "chip";
+  lbl.innerHTML = `<input type="checkbox" value="${i.id}" /><b>${i.nome}</b><small>${i.contexto}</small>`;
+  lbl.querySelector("input").addEventListener("change", e => {
+    lbl.classList.toggle("sel", e.target.checked);
+    const n = chipsEl.querySelectorAll("input:checked").length;
+    if (n > 3) { e.target.checked = false; lbl.classList.remove("sel"); alert("Escolha no máximo 3 interesses."); }
+  });
+  chipsEl.appendChild(lbl);
+});
+
+function repl(txt, tema) {
+  return String(txt).replace(/\[\[assunto\]\]/g, tema.assunto)
+    .replace(/\[\[artefato\]\]/g, tema.artefato).replace(/\[\[fonte\]\]/g, tema.fonte);
+}
+function lista(itens, tema) { return `<ul>${itens.map(x => `<li>${tema ? repl(x, tema) : x}</li>`).join("")}</ul>`; }
+
+document.getElementById("btnGerar").addEventListener("click", () => {
+  const exp = OFICINA.exploracoesNivel[nivelAtual];
+  const nomeExp = (document.getElementById("nomeExp").value || "").trim() || "(sem nome)";
+  const marcados = Array.from(chipsEl.querySelectorAll("input:checked")).map(c => c.value);
+  if (marcados.length === 0) { alert("Escolha ao menos 1 interesse."); return; }
+  const temas = marcados.map(id => OFICINA.interesses.find(i => i.id === id));
+  const nivelNome = NIVEL_INFO[nivelAtual].rotulo;
+  salvarLocal("interessesSel", temas.map(t => t.nome));
+
+  const momento = (classe, titulo, itens, tema) => `
+    <div class="momento ${classe}">
+      <header>${titulo}</header>
+      <ol>${itens.map(x => `<li>${repl(x, tema)}</li>`).join("")}</ol>
+    </div>`;
+
+  const blocos = temas.map(t => `
+    <section class="card">
+      <h2>Tema: ${t.nome}</h2>
+      <p class="ajuda">${t.contexto}.</p>
+      <div class="stepper">
+        ${momento("antes", "1 · Antes (sem IA)", exp.antes, t)}
+        ${momento("durante", "2 · Durante (com IA)", exp.durante, t)}
+        ${momento("depois", "3 · Depois", exp.depois, t)}
+      </div>
+    </section>`).join("");
+
+  const desafios = (OFICINA.quiz.desafiosNivel[nivelAtual] || []).map(d =>
+    `<div class="trilha-card" style="border-left-color:var(--indigo2)">
+       <span class="pill">${d.saber}</span> ${d.t}</div>`).join("");
+
+  const roteiro = `EXPLORAÇÃO MEDIADA DE IA — Tarefa prévia
+Nome: ${nomeExp}
+Nível: ${nivelNome}
+Temas: ${temas.map(t => t.nome).join("; ")}
+Ferramenta: ${exp.ferramenta}
+${exp.base}
+
+${temas.map(t => `== TEMA: ${t.nome} ==
+Artefato de partida: ${t.artefato}
+
+ANTES (sem IA)
+${exp.antes.map((x, i) => (i + 1) + ". " + repl(x, t)).join("\n")}
+
+DURANTE (com IA)
+${exp.durante.map((x, i) => (i + 1) + ". " + repl(x, t)).join("\n")}
+
+DEPOIS
+${exp.depois.map((x, i) => (i + 1) + ". " + repl(x, t)).join("\n")}`).join("\n\n")}
+
+PRODUTO: ${exp.produto}
+CRITÉRIOS DE CHECAGEM: ${exp.criterios.join(" | ")}`;
+
+  document.getElementById("saida").innerHTML = `
+    <section class="exp-hero">
+      <span class="badge">Nível ${nivelNome}</span>
+      <h2>${exp.titulo}</h2>
+      <p><strong>Objetivo:</strong> ${exp.objetivo}</p>
+      <p><strong>Ferramenta:</strong> ${exp.ferramenta}</p>
+      <p class="ajuda">${exp.base}</p>
+    </section>
+
+    <section class="card">
+      <h2>Seus temas e o que você vai entregar</h2>
+      <div class="callout"><strong>Produto desta tarefa:</strong> ${exp.produto}</div>
+      <p class="ajuda"><strong>Critérios de checagem:</strong> ${exp.criterios.map(c => "• " + c).join(" ")}</p>
+    </section>
+
+    ${blocos}
+
+    <section class="card">
+      <h2>Perguntas de mediação</h2>
+      <div class="perguntas"><ul>${exp.perguntas.map(x => `<li>${x}</li>`).join("")}</ul></div>
+    </section>
+
+    <section class="card">
+      <h2>Desafios de aprofundamento <span class="pill">nível ${nivelNome}</span></h2>
+      ${desafios}
+    </section>
+
+    <section class="card sem-print">
+      <h2>Bilhete de Saída</h2>
+      <textarea id="roteiro" style="min-height:220px">${roteiro}</textarea>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem">
+        <button class="btn verde" id="btnEnviar">Enviar por e-mail para a professora</button>
+        <button class="btn" id="btnCopiar">Copiar</button>
+        <button class="btn ghost" id="btnBaixar">Baixar .txt</button>
+        <button class="btn ghost" onclick="window.print()">Imprimir</button>
+      </div>
+    </section>
+    <p class="sem-print" style="text-align:center;margin-top:1rem">
+      <a class="btn verde" href="sorteio.html">Minha missão →</a>
+    </p>`;
+
+  document.getElementById("btnCopiar").onclick = e => copiarTexto(roteiro, e.target);
+  document.getElementById("btnBaixar").onclick = () => baixarArquivo("exploracao-mediada.txt", roteiro);
+  document.getElementById("btnEnviar").onclick = e => enviarResultado({
+    tipo: "exploracao", nome: nomeExp, ts: new Date().toISOString(),
+    nivel: nivelAtual, nivelNome, interesses: temas.map(t => t.nome)
+  }, e.target);
+  concluirEtapa("exploracao");
+  Tutor.falar("Exploração gerada! Agora siga cada tema: <strong>Antes</strong> (sem IA) → <strong>Durante</strong> (com IA) → <strong>Depois</strong>. Ao terminar, envie e vá para “Minha missão”.");
+  document.getElementById("saida").scrollIntoView({ behavior: "smooth" });
+});
+
+Tutor.definir([
+  "Oi! Sou o assistente desta etapa. Escolha o nível e de 1 a 3 interesses.",
+  "Clique em “Gerar minha exploração”: cada tema ganha um roteiro concreto (Antes → Durante → Depois).",
+  "No fim, clique em “Enviar por e-mail para a professora” e avance para “Minha missão”."
+]);
+Tutor.falar("Oi! Eu sou o seu assistente nesta etapa. Escolha o nível e os interesses, e clique em <strong>Gerar minha exploração</strong>.");
+gateEtapa("exploracao");
+</script>
+</body>
+</html>
